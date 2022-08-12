@@ -1,0 +1,49 @@
+body {
+    background-color:#42776C;
+    color:white;
+    font-family:sans-serif;
+    font-size:120%;
+}
+.container {
+    border-radius:20px;
+    padding:0px 40px;
+}
+.actor {
+    font-weight:bold;
+    font-size:120%;
+}
+.row {
+    margin-top:20px;
+}
+.callouts > * {
+    margin:10px 0;
+}
+#download {
+    background-color:#00BFA5;
+    padding:15px 40px;
+    border:2px solid #42776c;
+    color:white;
+    margin:10px;
+    border-radius:15px;
+    font-size:125%;
+    font-weight:bold;
+    max-width:80%;
+    display:inline-block;
+}
+ul {
+    list-style-type:none;
+}
+li:before {
+    content:"\2713";
+    font-weight:bold;
+    color:#42776c;
+    border:2px solid #42776c;
+    display:inline-block;
+    height:1.2em;
+    width:1.2em;
+    border-radius:.6em;
+    line-height:1em;
+    padding:0 0 0 .1em;
+    font-size:.9em;
+    margin-right:10px;
+}
