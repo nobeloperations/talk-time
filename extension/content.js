@@ -173,13 +173,14 @@ window.onload = function () {
   function createParticipantRow(record) {
     if (!record) { return; }
     let row = $el('tr');
+    row.setAttribute('data-name', record.name)
     row.innerHTML = `
-    <td class="talk-time-name">${record.name}</td>
-    <td class="talk-time-time">0:00</td>
-    <td class="talk-time-pct unique_pct_selector">0%</td>
-    <button class="send-message-button">Send message</button>
-    <td class="talk-time-groups">${createParticipantRowGroups(record)}</td>
-  `;
+        <td class="talk-time-name">${record.name}</td>
+        <td class="talk-time-time">0:00</td>
+        <td class="talk-time-pct unique_pct_selector">0%</td>
+        <button class="send-message-button">Send message</button>
+        <td class="talk-time-groups">${createParticipantRowGroups(record)}</td>
+      `;
     record.row = row;
     record.time_display = row.querySelector('.talk-time-time');
     record.pct_display = row.querySelector('.talk-time-pct');
@@ -483,6 +484,19 @@ window.onload = function () {
         }
       }
 
+      if (document.querySelectorAll('tr[data-name]')) {
+        const nameList = {};
+
+        document.querySelectorAll("tr[data-name]").forEach((item) => {
+          const currentName = item.getAttribute("data-name");
+
+            if (nameList[currentName]) {
+              item.remove();
+            }
+            nameList[currentName] = true;
+          });
+      }
+
       const closeBadInternetModal = document.querySelector('.close-bad-internet-modal')
       const badInternetModal = document.querySelector('.bad-internet-connection')
       if (closeBadInternetModal) {
@@ -561,7 +575,7 @@ window.onload = function () {
           for (let j = 0; j < allTr[i].children.length; j++) {
             let child = allTr[i].children[j]
             if (child.className === 'talk-time-name') {
-              if(child.textContent === storage.current_name) {
+              if (child.textContent === storage.current_name) {
                 allTr[i].querySelector('.send-message-button').disabled = true;
               }
             }
