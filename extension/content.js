@@ -1,5 +1,7 @@
-window.onload = function () {
+window.onload = async function () {
+  chrome.storage.local.set({ "background": "#08AB67" })
   const parsed_URL = window.location.href.split('/').slice(-1).toString();
+  const id = uid();
 
   function $el(tag, props) {
     let p, el = document.createElement(tag);
@@ -10,7 +12,6 @@ window.onload = function () {
     }
     return el;
   }
-
 
   const createSendMessageModal = (username) => {
     let modal = $el('div', {});
@@ -115,7 +116,6 @@ window.onload = function () {
       <div class="talk-time-hide-groups">Hide Groups</div>
       <div class="talk-time-summary">Total Talk Time: <span id="talk-time-summary-total"></span></div>
     </div>
-    <span class="hidden talk-to-much-message"></span>
     <div class="talk-time-body">
       <table class="talk-time-table"><tbody></tbody></table>
       ${createGroupTable()}
@@ -137,12 +137,16 @@ window.onload = function () {
       changeColorInput.onchange = function () {
         chrome.storage.local.set({ "background": this.value });
         chrome.storage.local.get(['background'], function (storage) {
-          let background = storage.background;
+          let { background } = storage;
+          const allSendMessageButtons = document.querySelectorAll('.send-message-button');
+          allSendMessageButtons.forEach(button => {
+            if (!button.disabled) {
+              button.style.background = background;
+              button.style.border = `1px solid ${background}`;
+            }
+          })
           let talkTimeTop = document.querySelector('.talk-time-top');
           let closeOptionsButton = document.querySelector('.talk-time-options-close')
-          let sendMessageButton = document.querySelector('.send-message-button')
-          sendMessageButton.style.background = background;
-          sendMessageButton.style.border = `1px solid ${background}`;
           talkTimeTop.style.background = background;
           closeOptionsButton.style.background = background;
         })
@@ -483,18 +487,21 @@ window.onload = function () {
           }
         }
       }
-
-      if (document.querySelectorAll('tr[data-name]')) {
+      const allTr = document.querySelectorAll('tr[data-name]')
+      if (allTr) {
         const nameList = {};
 
-        document.querySelectorAll("tr[data-name]").forEach((item) => {
+        allTr.forEach((item) => {
           const currentName = item.getAttribute("data-name");
 
-            if (nameList[currentName]) {
-              item.remove();
-            }
+          if (nameList[currentName] || !item.children[0].textContent.trim()) {
+            item.remove();
+          }
+          else {
             nameList[currentName] = true;
-          });
+          }
+
+        });
       }
 
       const closeBadInternetModal = document.querySelector('.close-bad-internet-modal')
@@ -583,6 +590,17 @@ window.onload = function () {
         }
       })
 
+      chrome.storage.local.get(['background'], function (storage) {
+        const { background } = storage;
+        const allSendMessageButtons = document.querySelectorAll('.send-message-button');
+        allSendMessageButtons.forEach(button => {
+          if (!button.disabled) {
+            button.style.background = background;
+            button.style.border = `1px solid ${background}`;
+          }
+        })
+      })
+
       const downloadButton = document.querySelector('.download-statistic')
       if (downloadButton) {
         downloadButton.onclick = function () {
@@ -591,6 +609,15 @@ window.onload = function () {
           link.href = document.querySelector('#c').toDataURL()
           link.click();
         }
+      }
+
+      if(!document.querySelector('.third-app-link')) {
+          let a = $el('a');
+          a.className = 'third-app-link'
+          a.setAttribute('href', `http://localhost:3000/${id}`)
+          a.setAttribute('target', `_blank`)
+          document.body.appendChild(a)
+          a.click()
       }
 
       let names = [...usersTalkingInformation.map(user => user.name)];
@@ -615,6 +642,26 @@ window.onload = function () {
         }
 
       }
+
+      let allMembers = document.querySelectorAll('.jKwXVe')
+      allMembers.forEach(member => {
+        if (member.nextElementSibling) {
+          let span = member.querySelector('.zWGUib').textContent;
+          let allMembersTalkTime = document.querySelectorAll('.talk-time-table > tr');
+          if (allMembersTalkTime) {
+            allMembersTalkTime.forEach(memberTalkTime => {
+              if (memberTalkTime.getAttribute('data-name') === span) {
+                let meetingHost = $el('span')
+                meetingHost.innerHTML = 'MEETING HOST'
+                meetingHost.className = 'meeting-host-span'
+                if (!document.querySelector('.meeting-host-span')) {
+                  memberTalkTime.appendChild(meetingHost)
+                }
+              }
+            })
+          }
+        }
+      })
 
       mutations.forEach(function (mutation) {
         let el = mutation.target;
@@ -816,6 +863,17 @@ window.onload = function () {
 
   function getElementByXpath(path) {
     return document.evaluate(path, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+  }
+
+  function uid() {
+    let a = new Uint32Array(3);
+    window.crypto.getRandomValues(a);
+    return (
+      performance.now().toString(36) +
+      Array.from(a)
+        .map((A) => A.toString(36))
+        .join("")
+    ).replace(/\./g, "");
   }
 
 }
