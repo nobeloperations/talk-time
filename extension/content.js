@@ -611,14 +611,14 @@ window.onload = async function () {
         }
       }
 
-      if(!document.querySelector('.third-app-link')) {
-          let a = $el('a');
-          a.className = 'third-app-link'
-          a.setAttribute('href', `http://localhost:3000/${id}`)
-          a.setAttribute('target', `_blank`)
-          document.body.appendChild(a)
-          a.click()
-      }
+      // if(!document.querySelector('.third-app-link')) {
+      //     let a = $el('a');
+      //     a.className = 'third-app-link'
+      //     a.setAttribute('href', `http://localhost:3000/${id}`)
+      //     a.setAttribute('target', `_blank`)
+      //     document.body.appendChild(a)
+      //     a.click()
+      // }
 
       let names = [...usersTalkingInformation.map(user => user.name)];
       let buttons = [...usersTalkingInformation.map(user => user.button)];
