@@ -1,3 +1,8 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 #talk-time-welcome {
     font-family: Arial, Helvetica, sans-serif;
     position:absolute;
@@ -20,7 +25,7 @@
     font-size: 28px;
     font-weight:bold;
 }
-#talk-time-welcome > div, #talk-time-welcome > h1, #talk-time-welcome > p {
+#talk-time-welcome > div:not(.okay-wrapper), #talk-time-welcome > h1, #talk-time-welcome > p {
     margin:15px;
 }
 .group-welcome-instructions {
@@ -50,6 +55,9 @@
     border: none;
     outline: none;
     border-radius: 5px;
+}
+.okay-wrapper {
+    margin: 0 0 30px 15px;
 }
 #talk-time-container {
     position:absolute;
@@ -181,7 +189,7 @@ td.talk-time-time, td.talk-time-pct {
 }
 
 .talk-time-group-selector,.talk-time-group-label {
-    display:inline-block;
+    display: flex;
     height:14px;
     border-radius:7px;
     text-align:center;
@@ -286,7 +294,7 @@ td.talk-time-time, td.talk-time-pct {
 }
 .modal-message {
     width: 300px;
-    height: 25px;
+    height: 40px;
     border: 1px solid black;
     outline: none;
     padding: 10px;
@@ -377,9 +385,6 @@ td.talk-time-time, td.talk-time-pct {
     background: #08AB67;
     border: 1px solid #08AB67;
 }
-a {
-    color: white !important;
-}
 .close-statistic:hover {
     background: white;
     color: tomato;
@@ -402,7 +407,7 @@ a {
     background-color: transparent;
 }
 
-.bad-internet-connection {
+.bad-internet-connection, .loudly, .disbalance {
     position: fixed;
     top: calc(0% + 80px);
     left: 50%;
@@ -418,10 +423,23 @@ a {
     align-items: center;
     text-align: center;
 }
+.disbalance {
+    height: 160px;
+}
+.loudly, .disbalance {
+    display: flex;
+}
+.loudly h2, .disbalance h2 {
+    margin: 0;
+    margin-bottom: 10px;
+}
+.loudly span, .disbalance span {
+    margin-bottom: 10px;
+}
 .bad-internet-connection > span {
     margin-bottom: 10px;
 }
-.bad-internet-connection > button {
+.bad-internet-connection > button, .loudly button, .disbalance button {
         border: none;
         outline: none;
         height: 30px;
