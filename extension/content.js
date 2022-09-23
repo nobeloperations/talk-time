@@ -1,55 +1,55 @@
 window.onload = async function () {
   chrome.storage.local.set({ "background": "#08AB67" })
   const parsed_URL = window.location.href.split('/').slice(-1).toString().slice(0, 12);
-  let MAX_MICROPHONE_LOUD = 85;
+  // let MAX_MICROPHONE_LOUD = 85;
 
-  navigator.getUserMedia = navigator.getUserMedia ||
-    navigator.webkitGetUserMedia ||
-    navigator.mozGetUserMedia;
-  if (navigator.getUserMedia) {
-    navigator.getUserMedia({
-      audio: true
-    },
-      function (stream) {
-        audioContext = new AudioContext();
-        analyser = audioContext.createAnalyser();
-        microphone = audioContext.createMediaStreamSource(stream);
-        javascriptNode = audioContext.createScriptProcessor(2048, 1, 1);
+  // navigator.getUserMedia = navigator.getUserMedia ||
+  //   navigator.webkitGetUserMedia ||
+  //   navigator.mozGetUserMedia;
+  // if (navigator.getUserMedia) {
+  //   navigator.getUserMedia({
+  //     audio: true
+  //   },
+  //     function (stream) {
+  //       audioContext = new AudioContext();
+  //       analyser = audioContext.createAnalyser();
+  //       microphone = audioContext.createMediaStreamSource(stream);
+  //       javascriptNode = audioContext.createScriptProcessor(2048, 1, 1);
 
-        analyser.smoothingTimeConstant = 0.8;
-        analyser.fftSize = 1024;
+  //       analyser.smoothingTimeConstant = 0.8;
+  //       analyser.fftSize = 1024;
 
-        microphone.connect(analyser);
-        analyser.connect(javascriptNode);
-        javascriptNode.connect(audioContext.destination);
+  //       microphone.connect(analyser);
+  //       analyser.connect(javascriptNode);
+  //       javascriptNode.connect(audioContext.destination);
 
 
-        javascriptNode.onaudioprocess = function () {
-          var array = new Uint8Array(analyser.frequencyBinCount);
-          analyser.getByteFrequencyData(array);
-          let values = 0;
+  //       javascriptNode.onaudioprocess = function () {
+  //         var array = new Uint8Array(analyser.frequencyBinCount);
+  //         analyser.getByteFrequencyData(array);
+  //         let values = 0;
 
-          for (let i = 0; i < array.length; i++) {
-            values += (array[i]);
-          }
+  //         for (let i = 0; i < array.length; i++) {
+  //           values += (array[i]);
+  //         }
 
           
-          let average = values / array.length;
-          if (average > MAX_MICROPHONE_LOUD) {
-            const loudlyModal = document.querySelector('.loudly')
-            if (loudlyModal.style.display !== 'flex') {
-              loudlyModal.style.display = 'flex'
-            }
-          }
+  //         let average = values / array.length;
+  //         if (average > MAX_MICROPHONE_LOUD) {
+  //           const loudlyModal = document.querySelector('.loudly')
+  //           if (loudlyModal.style.display !== 'flex') {
+  //             loudlyModal.style.display = 'flex'
+  //           }
+  //         }
 
-        }
-      },
-      function (err) {
-        console.log("The following error occured: " + err.name)
-      });
-  } else {
-    console.log("getUserMedia not supported");
-  }
+  //       }
+  //     },
+  //     function (err) {
+  //       console.log("The following error occured: " + err.name)
+  //     });
+  // } else {
+  //   console.log("getUserMedia not supported");
+  // }
 
   function $el(tag, props) {
     let p, el = document.createElement(tag);
@@ -61,20 +61,20 @@ window.onload = async function () {
     return el;
   }
 
-  (function createLoudlyModal() {
-    if (document.querySelector('.loudly')) return
-    else {
-      let modal = $el('div');
-      modal.className = 'loudly'
-      modal.innerHTML = `
-          <h2 class="loudly-title">Very loud sounds!</h2>
-          <span>Your microphone making very loud sounds<br/>Let's all make our meeting more comfortable together </span>
-          <button class="loudly-close">Close</button>
-      `
-      modal.style.display = 'none'
-      document.querySelector('body').appendChild(modal)
-    }
-  })()
+  // (function createLoudlyModal() {
+  //   if (document.querySelector('.loudly')) return
+  //   else {
+  //     let modal = $el('div');
+  //     modal.className = 'loudly'
+  //     modal.innerHTML = `
+  //         <h2 class="loudly-title">Very loud sounds!</h2>
+  //         <span>Your microphone making very loud sounds<br/>Let's all make our meeting more comfortable together </span>
+  //         <button class="loudly-close">Close</button>
+  //     `
+  //     modal.style.display = 'none'
+  //     document.querySelector('body').appendChild(modal)
+  //   }
+  // })()
 
   function createDisbalanceModal() {
     if (document.querySelector('.disbalance')) return
@@ -439,11 +439,11 @@ window.onload = async function () {
   }
   setInterval(render, 1000);
 
-  let loudlyModal = document.querySelector('.loudly');
-  let closeLoudlyModal = document.querySelector('.loudly-close')
-  closeLoudlyModal.onclick = function () {
-    loudlyModal.style.display = 'none'
-  }
+  // let loudlyModal = document.querySelector('.loudly');
+  // let closeLoudlyModal = document.querySelector('.loudly-close')
+  // closeLoudlyModal.onclick = function () {
+  //   loudlyModal.style.display = 'none'
+  // }
 
   // ==================================================================
   // SPEECH PROCESSING AND TIMING
