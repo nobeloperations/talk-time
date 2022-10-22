@@ -3,6 +3,9 @@
     padding: 0;
     box-sizing: border-box;
 }
+::-webkit-scrollbar {
+    display: none;
+  }
 #talk-time-welcome {
     font-family: Arial, Helvetica, sans-serif;
     position:absolute;
@@ -63,7 +66,7 @@
     position:absolute;
     bottom:0;
     right:5px;
-    min-width:350px;
+    min-width: 370px;
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
     z-index:99999;
@@ -272,15 +275,21 @@ td.talk-time-time, td.talk-time-pct {
 .hidden {
     display: none;
 }
-.send-message-button {
+.send-message-button, .give-badge-button {
     outline: none;
-    background: #08AB67;
-    border: 1px solid #08AB67;
     color: white;
     padding: 5px;
     border-radius: 5px;
     cursor: pointer;
     transition: all .4s ease;
+    border: none;
+}
+.send-message-button {
+    margin-right: 10px;
+    background: #08AB67;
+}
+.give-badge-button {
+    background: rgb(0, 126, 215);
 }
 .modal-send:hover {
     background: transparent;
@@ -455,4 +464,71 @@ button:disabled {
     background-color: #cccccc !important;
     border: 1px solid #cccccc !important;
     color: #666666 !important;
+}
+.badge-modal {
+    height: 300px;
+    width: 400px;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 11111111;
+}
+.badge-header {
+    width: 100%;
+    height: 60px;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    padding: 5px;
+    text-align: center;
+}
+.badge-header h1 {
+    margin-bottom: 5px;
+    font-size: 12px;
+}
+.badge-modal-body {
+    height: calc(100% - 40px);
+    overflow-y: scroll;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 5px;
+    padding: 5px 0 10px 0;
+    background: white;
+}
+.badge-modal button:not(.close-badge-modal) {
+    width: 190px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    align-items: center;
+    font-size: 12px;
+    cursor: pointer;
+    padding-left: 5px;
+    border: none;
+    outline: none;
+    background: rgb(2, 142, 193);
+    color: white;
+    transition: .2s all ease-in;
+}
+.badge-modal button:not(.close-badge-modal):hover {
+    background: rgb(2, 121, 163);
+}
+.badge-modal button img {
+    width: 24px;
+    margin-right: 10px;
+}
+.close-button-wrapper {
+    width: 400px;
+    height: 30px;
+    background: white;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding-right: 10px;
+}
+.close-button-wrapper span {
+    cursor: pointer;
 }

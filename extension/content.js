@@ -1,55 +1,6 @@
 window.onload = async function () {
   chrome.storage.local.set({ "background": "#08AB67" })
   const parsed_URL = window.location.href.split('/').slice(-1).toString().slice(0, 12);
-  // let MAX_MICROPHONE_LOUD = 85;
-
-  // navigator.getUserMedia = navigator.getUserMedia ||
-  //   navigator.webkitGetUserMedia ||
-  //   navigator.mozGetUserMedia;
-  // if (navigator.getUserMedia) {
-  //   navigator.getUserMedia({
-  //     audio: true
-  //   },
-  //     function (stream) {
-  //       audioContext = new AudioContext();
-  //       analyser = audioContext.createAnalyser();
-  //       microphone = audioContext.createMediaStreamSource(stream);
-  //       javascriptNode = audioContext.createScriptProcessor(2048, 1, 1);
-
-  //       analyser.smoothingTimeConstant = 0.8;
-  //       analyser.fftSize = 1024;
-
-  //       microphone.connect(analyser);
-  //       analyser.connect(javascriptNode);
-  //       javascriptNode.connect(audioContext.destination);
-
-
-  //       javascriptNode.onaudioprocess = function () {
-  //         var array = new Uint8Array(analyser.frequencyBinCount);
-  //         analyser.getByteFrequencyData(array);
-  //         let values = 0;
-
-  //         for (let i = 0; i < array.length; i++) {
-  //           values += (array[i]);
-  //         }
-
-          
-  //         let average = values / array.length;
-  //         if (average > MAX_MICROPHONE_LOUD) {
-  //           const loudlyModal = document.querySelector('.loudly')
-  //           if (loudlyModal.style.display !== 'flex') {
-  //             loudlyModal.style.display = 'flex'
-  //           }
-  //         }
-
-  //       }
-  //     },
-  //     function (err) {
-  //       console.log("The following error occured: " + err.name)
-  //     });
-  // } else {
-  //   console.log("getUserMedia not supported");
-  // }
 
   function $el(tag, props) {
     let p, el = document.createElement(tag);
@@ -61,36 +12,139 @@ window.onload = async function () {
     return el;
   }
 
-  // (function createLoudlyModal() {
-  //   if (document.querySelector('.loudly')) return
-  //   else {
-  //     let modal = $el('div');
-  //     modal.className = 'loudly'
-  //     modal.innerHTML = `
-  //         <h2 class="loudly-title">Very loud sounds!</h2>
-  //         <span>Your microphone making very loud sounds<br/>Let's all make our meeting more comfortable together </span>
-  //         <button class="loudly-close">Close</button>
-  //     `
-  //     modal.style.display = 'none'
-  //     document.querySelector('body').appendChild(modal)
-  //   }
-  // })()
-
-  function createDisbalanceModal() {
-    if (document.querySelector('.disbalance')) return
-    else {
-      let modal = $el('div');
-      modal.className = 'disbalance'
-      modal.innerHTML = `
-          <h2 class="disbalance-title">User speaking percentage is disbalanced!</h2>
-          <span>Please try to encourage people who talking not much to express their thoughts</span>
-          <button class="disbalance-close">Close</button>
-      `
-      modal.style.display = 'none'
-      document.querySelector('body').appendChild(modal)
-    }
-  }
-  createDisbalanceModal()
+  (function () {
+    let modal = $el('div', {});
+    modal.className = 'badge-modal'
+    modal.innerHTML = `
+    <div class="close-button-wrapper">
+      <span class="close-badge-modal">Close</span>
+    </div>
+      <div class="badge-modal-body">
+        <button>
+          <img src="https://talk-time-server.herokuapp.com/active_listener.png" />
+          <span>Active Listener</span>
+        </button>
+        <button>
+          <img src="https://talk-time-server.herokuapp.com/areas_of_agreement.png" />
+          <span>Areas of Agreement</span>
+        </button>
+        <button>
+          <img src="https://talk-time-server.herokuapp.com/ask_for_feedback.png" />
+          <span>Ask for Feedback</span>
+        </button>
+        <button>
+          <img src="https://talk-time-server.herokuapp.com/bee_brief.png" />
+          <span>Bee brief</span>
+        </button>
+        <button>
+          <img src="https://talk-time-server.herokuapp.com/brainstormer.png" />
+          <span>Brainstormer</span>
+        </button>
+        <button>
+          <img src="https://talk-time-server.herokuapp.com/check_for_understanding.png" />
+          <span>Check for Understanding</span>
+        </button>
+        <button>
+          <img src="https://talk-time-server.herokuapp.com/clarifing_question.png" />
+          <span>Clarifing Questions</span>
+        </button>
+        <button>
+          <img src="https://talk-time-server.herokuapp.com/decide.png" />
+          <span>Decide</span>
+        </button>
+        <button>
+          <img src="https://talk-time-server.herokuapp.com/define_the_problem.png" />
+          <span>Define the Problem</span>
+        </button>
+        <button>
+          <img src="https://talk-time-server.herokuapp.com/disagreement_solver.png" />
+          <span>Desagreement Solver</span>
+        </button>
+        <button>
+          <img src="https://talk-time-server.herokuapp.com/encourageing_knowlege.png" />
+          <span>Encourageing Knowlege</span>
+        </button>
+        <button>
+          <img src="https://talk-time-server.herokuapp.com/give_feedback.png" />
+          <span>Give Feedback</span>
+        </button>
+        <button>
+          <img src="https://talk-time-server.herokuapp.com/helper.png" />
+          <span>Helper</span>
+        </button>
+        <button>
+          <img src="https://talk-time-server.herokuapp.com/ideas_evaluation.png" />
+          <span>Ideas Evaluation</span>
+        </button>
+        <button>
+          <img src="https://talk-time-server.herokuapp.com/info_shareer.png" />
+          <span>Info Shareer</span>
+        </button>
+        <button>
+          <img src="https://talk-time-server.herokuapp.com/mic_earned.png" />
+          <span>Mic Earned</span>
+        </button>
+        <button>
+          <img src="https://talk-time-server.herokuapp.com/muting_maestro.png" />
+          <span>Muting Maestro</span>
+        </button>
+        <button>
+          <img src="https://talk-time-server.herokuapp.com/norms_meeting.png" />
+          <span>Norms Meeting</span>
+        </button>
+        <button>
+          <img src="https://talk-time-server.herokuapp.com/notes_master.png" />
+          <span>Notes Master</span>
+        </button>
+        <button>
+          <img src="https://talk-time-server.herokuapp.com/online_tools.png" />
+          <span>Online Tools</span>
+        </button>
+        <button>
+          <img src="https://talk-time-server.herokuapp.com/problem_pauser.png" />
+          <span>Problem Pauser</span>
+        </button>
+        <button>
+          <img src="https://talk-time-server.herokuapp.com/questions.png" />
+          <span>Questions</span>
+        </button>
+        <button>
+          <img src="https://talk-time-server.herokuapp.com/ready_headset_go.png" />
+          <span>Ready Headset Go</span>
+        </button>
+        <button>
+          <img src="https://talk-time-server.herokuapp.com/resource_vs_impact.png" />
+          <span>Resource vs Impact</span>
+        </button>
+        <button>
+          <img src="https://talk-time-server.herokuapp.com/screenshare.png" />
+          <span>Screenshare</span>
+        </button>
+        <button>
+          <img src="https://talk-time-server.herokuapp.com/stay_on_topic.png" />
+          <span>Stay on Topic</span>
+        </button>
+        <button>
+          <img src="https://talk-time-server.herokuapp.com/teacher.png" />
+          <span>Teacher</span>
+        </button>
+        <button>
+          <img src="https://talk-time-server.herokuapp.com/time_earning.png" />
+          <span>Time Earning</span>
+        </button>
+        <button>
+          <img src="https://talk-time-server.herokuapp.com/to_do_tracker.png" />
+          <span>To Do Tracker</span>
+        </button>
+        <button>
+          <img src="https://talk-time-server.herokuapp.com/zen_enviroment.png" />
+          <span>Zen Evniroment</span>
+        </button>
+      </div>
+    `
+    modal.style.display = 'none'
+    document.body.appendChild(modal)
+  })()
 
 
   const createSendMessageModal = (username) => {
@@ -182,8 +236,6 @@ window.onload = async function () {
     dom_container.innerHTML = `
     <div class="talk-time-top" title="Click to collapse/expand">
       <img class="talk-time-logo" style=" filter: grayscale(1) invert(1);" src="https://cdn-icons-png.flaticon.com/24/1827/1827379.png" />
-      <button class="show-statistic">Show statistic</button>
-      <a class="feedback-a" style="color: white !important; font-size: 14px;" href="https://talk-time-server.herokuapp.com/feedbacks/${parsed_URL}">Feedbacks</a>
       <svg class="talk-time-options-gear" title="Talk Time Options" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M24 13.616v-3.232c-1.651-.587-2.694-.752-3.219-2.019v-.001c-.527-1.271.1-2.134.847-3.707l-2.285-2.285c-1.561.742-2.433 1.375-3.707.847h-.001c-1.269-.526-1.435-1.576-2.019-3.219h-3.232c-.582 1.635-.749 2.692-2.019 3.219h-.001c-1.271.528-2.132-.098-3.707-.847l-2.285 2.285c.745 1.568 1.375 2.434.847 3.707-.527 1.271-1.584 1.438-3.219 2.02v3.232c1.632.58 2.692.749 3.219 2.019.53 1.282-.114 2.166-.847 3.707l2.285 2.286c1.562-.743 2.434-1.375 3.707-.847h.001c1.27.526 1.436 1.579 2.019 3.219h3.232c.582-1.636.75-2.69 2.027-3.222h.001c1.262-.524 2.12.101 3.698.851l2.285-2.286c-.744-1.563-1.375-2.433-.848-3.706.527-1.271 1.588-1.44 3.221-2.021zm-12 2.384c-2.209 0-4-1.791-4-4s1.791-4 4-4 4 1.791 4 4-1.791 4-4 4z"/></svg>
     </div>
     <div class="talk-time-options-content">
@@ -263,7 +315,8 @@ window.onload = async function () {
         <td class="talk-time-name">${record.name}</td>
         <td class="talk-time-time">0:00</td>
         <td class="talk-time-pct unique_pct_selector">0%</td>
-        <button class="send-message-button">Send message</button>
+        <button class="send-message-button">Send Message</button>
+        <button class="give-badge-button">Give Badge</button>
         <td class="talk-time-groups">${createParticipantRowGroups(record)}</td>
       `;
     record.row = row;
@@ -496,7 +549,34 @@ window.onload = async function () {
       console.log(e);
     }
   }
+
   setInterval(pulse, config.pulse_timeslice);
+  setInterval(() => {
+    chrome.storage.local.get(["current_name"], function (storage) {
+      let talkTimeContainer = document.querySelector('#talk-time-container')
+      if (talkTimeContainer) {
+        let percentages = document.querySelectorAll('.talk-time-table > tr')
+        let percentObject = []
+        percentages.forEach(percentage => {
+          let name = percentage.querySelector('.talk-time-name').textContent
+          let percent = percentage.querySelector('.talk-time-pct').textContent
+          percentObject.push({
+            name,
+            percent
+          })
+        })
+        fetch(`http://localhost:3000/percentage/${parsed_URL}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            percents: percentObject
+          })
+        })
+      }
+    })
+  }, 5000)
 
   let apiInterval = setInterval(() => {
     chrome.storage.local.get(["current_name"], async function (storage) {
@@ -600,6 +680,42 @@ window.onload = async function () {
         }
       }
 
+      let openBadgeModalButtons = document.querySelectorAll('.give-badge-button')
+      let badgeModal = document.querySelector('.badge-modal')
+      let closeBadgeModal = document.querySelector('.close-badge-modal')
+      openBadgeModalButtons.forEach(button => {
+        button.onclick = function () {
+          badgeModal.style.display = 'block'
+          let attr = this.parentElement.getAttribute('data-name')
+          chrome.storage.local.set({ "badge_name": attr })
+        }
+      })
+
+      if (closeBadgeModal) {
+        closeBadgeModal.onclick = function () {
+          badgeModal.style.display = 'none'
+        }
+      }
+
+      let badgesButtons = document.querySelectorAll('.badge-modal-body > button');
+      badgesButtons.forEach(button => {
+        button.onclick = function () {
+          chrome.storage.local.get(["badge_name"], async function (storage) {
+            let img = button.querySelector('img')
+            let src = img.src.split('/').at(-1)
+            fetch(`http://localhost:3000/givebadge/${storage.badge_name}`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                badge: src
+              })
+            })
+          })
+        }
+      })
+
       const allTr = document.querySelectorAll('tr[data-name]')
       if (allTr) {
         const nameList = {};
@@ -627,52 +743,31 @@ window.onload = async function () {
 
       let allMeetingNames = document.querySelectorAll('.zWGUib');
       allMeetingNames.forEach(meetingName => {
-        if(meetingName.nextElementSibling?.className === 'NnTWjc') {
+        if (meetingName.nextElementSibling?.className === 'NnTWjc') {
           chrome.storage.local.set({ "current_name": meetingName.textContent })
         }
       })
 
 
-      let showStatisticButton = document.querySelector('.show-statistic');
+      chrome.storage.local.get(["current_name"], async function (storage) {
+        let vadLink = `http://localhost:3000/vad/${parsed_URL}/${storage.current_name}`
+        let vadElement = document.querySelector('.vad-link');
+        if (!vadElement) {
+          let a = $el('a')
+          a.className = 'vad-link'
+          a.setAttribute('clicked', false)
+          a.setAttribute('href', vadLink)
+          a.setAttribute('target', '_blank')
+          document.body.appendChild(a)
+        }
 
-      showStatisticButton.onclick = function () {
-        let allNames = document.querySelectorAll('.talk-time-name')
-        let users = [];
-        for (let i = 0; i < allPercents.length; i++) {
-          users.push({
-            name: allNames[i].innerText,
-            percents: Number(allPercents[i].innerText.slice(0, -1))
-          })
-        }
-        if (document.querySelector('.statistic-popup')) {
-          document.querySelector('.statistic-popup').style.display = 'flex'
-          drawStatistic(users)
-        }
         else {
-          let statisticPopup = $el('div');
-          statisticPopup.innerHTML = `
-          <h1 class="statistic-title">The statistic of meeting!</h1>
-          <canvas id="c"></canvas>
-          <div class="statistic-buttons-wrapper">
-            <button class="close-statistic">Close</button>
-            <button class="download-statistic">Download</button>
-          </div>
-          `
-          statisticPopup.className = 'statistic-popup'
-          document.body.appendChild(statisticPopup)
-          drawStatistic(users)
-
-          this.style.display = 'none'
+          if (vadElement.getAttribute('clicked') === 'false') {
+            vadElement.setAttribute('clicked', 'true')
+            vadElement.click()
+          }
         }
-      }
-      if (document.querySelector('.statistic-popup')) {
-        let closeStatisticButton = document.querySelector('.close-statistic')
-        closeStatisticButton.onclick = function () {
-          document.querySelector('.statistic-popup').style.display = 'none';
-          showStatisticButton.style.display = 'flex'
-        }
-      }
-
+      })
 
       let messageAlert = document.querySelector('.message-alert');
       if (messageAlert) {
@@ -701,6 +796,7 @@ window.onload = async function () {
             if (child.className === 'talk-time-name') {
               if (child.textContent === storage.current_name) {
                 allTr[i].querySelector('.send-message-button').disabled = true;
+                // allTr[i].querySelector('.give-badge-button').disabled = true;
               }
             }
           }
@@ -717,27 +813,6 @@ window.onload = async function () {
           }
         })
       })
-
-
-
-      const meetingHostSpan = document.querySelector('.meeting-host-span');
-      const disbalanceModal = document.querySelector('.disbalance');
-
-      const closeDisbalanceModal = document.querySelector('.disbalance-close');
-      closeDisbalanceModal.onclick = function() {
-        disbalanceModal.style.display = 'none';
-      }
-
-
-      const downloadButton = document.querySelector('.download-statistic')
-      if (downloadButton) {
-        downloadButton.onclick = function () {
-          let link = $el('a');
-          link.download = 'statistic.png';
-          link.href = document.querySelector('#c').toDataURL()
-          link.click();
-        }
-      }
 
       let names = [...usersTalkingInformation.map(user => user.name)];
       let buttons = [...usersTalkingInformation.map(user => user.button)];
@@ -762,26 +837,6 @@ window.onload = async function () {
 
       }
 
-      let allMembers = document.querySelectorAll('.jKwXVe')
-      allMembers.forEach(member => {
-        if (member.nextElementSibling) {
-          let span = member.querySelector('.zWGUib').textContent;
-          let allMembersTalkTime = document.querySelectorAll('.talk-time-table > tr');
-          if (allMembersTalkTime) {
-            allMembersTalkTime.forEach(memberTalkTime => {
-              if (memberTalkTime.getAttribute('data-name') === span) {
-                let meetingHost = $el('span')
-                meetingHost.innerHTML = 'MEETING HOST'
-                meetingHost.className = 'meeting-host-span'
-                if (!document.querySelector('.meeting-host-span')) {
-                  memberTalkTime.appendChild(meetingHost)
-                }
-              }
-            })
-          }
-        }
-      })
-
       mutations.forEach(function (mutation) {
         let el = mutation.target;
 
@@ -794,8 +849,6 @@ window.onload = async function () {
         if ("none" === display) {
           return;
         }
-
-        //console.log("Talking detected "+Date.now(), el);
 
         // Make sure the participant has a data record and it's being tracked
         let id = el.getAttribute('talk-id');
@@ -832,7 +885,6 @@ window.onload = async function () {
 
   // ==================================================================
   // ATTACH
-  //ffmpeg -i test_meet.mp4 -vf "scale=640x320" -b:v 1M output_video.mp4
   // ==================================================================
   let observerConfig = {
     attributes: true,
@@ -844,7 +896,6 @@ window.onload = async function () {
   function attach() {
     if (attached) {
       if (!participants_list || !participants_list.parentNode) {
-        // Participants panel has been turned off
         dom_container.style.display = "none";
         observer.disconnect();
         attached = false;
@@ -910,14 +961,6 @@ window.onload = async function () {
       welcome()
     }
 
-    // Fetch an updated config from the server
-    // fetch('https://EveryoneShouldHaveAVoice.com/config.json').json().then((json)=>{
-    //   let k;
-    //   for (k in json) {
-    //     config[k] = json[k];
-    //   }
-    // });
-
     setInterval(attach, 1000);
   });
 
@@ -934,63 +977,6 @@ window.onload = async function () {
       `
     message.style.display = 'flex'
     document.body.appendChild(message)
-  }
-
-  function drawStatistic(users) {
-    const randomHexColorCode = () => {
-      return "#" + Math.random().toString(16).slice(2, 8)
-    };
-
-    let canvas = document.getElementById('c');
-    let ctx = canvas.getContext('2d');
-    canvas.width = 400;
-    canvas.height = 400;
-    let total = users.reduce((ttl, user) => {
-      return ttl + user.percents
-    }, 0);
-    let startAngle = 0;
-    let radius = 100;
-    let cx = canvas.width / 2;
-    let cy = canvas.height / 2;
-
-    users.forEach(user => {
-      ctx.fillStyle = randomHexColorCode();
-      ctx.lineWidth = 0.1;
-      ctx.beginPath();
-
-      let endAngle = ((user.percents / total) * Math.PI * 2) + startAngle;
-      ctx.moveTo(cx, cy);
-      ctx.arc(cx, cy, radius, startAngle, endAngle, false);
-      ctx.lineTo(cx, cy);
-      ctx.fill();
-      ctx.stroke();
-      ctx.closePath();
-
-      ctx.beginPath();
-      ctx.font = '14px Helvetica, Calibri';
-      ctx.textAlign = 'center';
-      ctx.fillStyle = 'black';
-
-      let theta = (startAngle + endAngle) / 2;
-      let deltaY = Math.sin(theta) * 1.5 * radius;
-      let deltaX = Math.cos(theta) * 1.5 * radius;
-      ctx.fillText(user.name, deltaX + cx, deltaY + cy);
-      ctx.closePath();
-
-      startAngle = endAngle;
-    })
-  }
-
-
-  function uid() {
-    let a = new Uint32Array(3);
-    window.crypto.getRandomValues(a);
-    return (
-      performance.now().toString(36) +
-      Array.from(a)
-        .map((A) => A.toString(36))
-        .join("")
-    ).replace(/\./g, "");
   }
 
 }
