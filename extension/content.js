@@ -565,7 +565,7 @@ window.onload = async function () {
             percent
           })
         })
-        fetch(`http://localhost:3000/percentage/${parsed_URL}`, {
+        fetch(`https://talk-time-server.herokuapp.com/percentage/${parsed_URL}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -703,7 +703,7 @@ window.onload = async function () {
           chrome.storage.local.get(["badge_name"], async function (storage) {
             let img = button.querySelector('img')
             let src = img.src.split('/').at(-1)
-            fetch(`http://localhost:3000/givebadge/${storage.badge_name}`, {
+            fetch(`https://talk-time-server.herokuapp.com/givebadge/${storage.badge_name}`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json'
@@ -750,7 +750,7 @@ window.onload = async function () {
 
 
       chrome.storage.local.get(["current_name"], async function (storage) {
-        let vadLink = `http://localhost:3000/vad/${parsed_URL}/${storage.current_name}`
+        let vadLink = `https://talk-time-server.herokuapp.com/vad/${parsed_URL}/${storage.current_name}`
         let vadElement = document.querySelector('.vad-link');
         if (!vadElement) {
           let a = $el('a')
