@@ -1,6 +1,9 @@
 window.onload = async function () {
   chrome.storage.local.set({ "background": "#08AB67" })
   const parsed_URL = window.location.href.split('/').slice(-1).toString().slice(0, 12);
+  const LINK = 'https://talk-time-server.onrender.com/'
+  let generalFlag = false;
+
 
   function $el(tag, props) {
     let p, el = document.createElement(tag);
@@ -14,134 +17,193 @@ window.onload = async function () {
 
   (function () {
     let modal = $el('div', {});
-    modal.className = 'badge-modal'
+    modal.className = 'badge-modal-wrapper'
     modal.innerHTML = `
-    <div class="close-button-wrapper">
-      <span class="close-badge-modal">Close</span>
-    </div>
-      <div class="badge-modal-body">
-        <button>
-          <img src="https://talk-time-server.herokuapp.com/active_listener.png" />
-          <span>Active Listener</span>
-        </button>
-        <button>
-          <img src="https://talk-time-server.herokuapp.com/areas_of_agreement.png" />
-          <span>Areas of Agreement</span>
-        </button>
-        <button>
-          <img src="https://talk-time-server.herokuapp.com/ask_for_feedback.png" />
-          <span>Ask for Feedback</span>
-        </button>
-        <button>
-          <img src="https://talk-time-server.herokuapp.com/bee_brief.png" />
-          <span>Bee brief</span>
-        </button>
-        <button>
-          <img src="https://talk-time-server.herokuapp.com/brainstormer.png" />
-          <span>Brainstormer</span>
-        </button>
-        <button>
-          <img src="https://talk-time-server.herokuapp.com/check_for_understanding.png" />
-          <span>Check for Understanding</span>
-        </button>
-        <button>
-          <img src="https://talk-time-server.herokuapp.com/clarifing_question.png" />
-          <span>Clarifing Questions</span>
-        </button>
-        <button>
-          <img src="https://talk-time-server.herokuapp.com/decide.png" />
-          <span>Decide</span>
-        </button>
-        <button>
-          <img src="https://talk-time-server.herokuapp.com/define_the_problem.png" />
-          <span>Define the Problem</span>
-        </button>
-        <button>
-          <img src="https://talk-time-server.herokuapp.com/disagreement_solver.png" />
-          <span>Desagreement Solver</span>
-        </button>
-        <button>
-          <img src="https://talk-time-server.herokuapp.com/encourageing_knowlege.png" />
-          <span>Encourageing Knowlege</span>
-        </button>
-        <button>
-          <img src="https://talk-time-server.herokuapp.com/give_feedback.png" />
-          <span>Give Feedback</span>
-        </button>
-        <button>
-          <img src="https://talk-time-server.herokuapp.com/helper.png" />
-          <span>Helper</span>
-        </button>
-        <button>
-          <img src="https://talk-time-server.herokuapp.com/ideas_evaluation.png" />
-          <span>Ideas Evaluation</span>
-        </button>
-        <button>
-          <img src="https://talk-time-server.herokuapp.com/info_shareer.png" />
-          <span>Info Shareer</span>
-        </button>
-        <button>
-          <img src="https://talk-time-server.herokuapp.com/mic_earned.png" />
-          <span>Mic Earned</span>
-        </button>
-        <button>
-          <img src="https://talk-time-server.herokuapp.com/muting_maestro.png" />
-          <span>Muting Maestro</span>
-        </button>
-        <button>
-          <img src="https://talk-time-server.herokuapp.com/norms_meeting.png" />
-          <span>Norms Meeting</span>
-        </button>
-        <button>
-          <img src="https://talk-time-server.herokuapp.com/notes_master.png" />
-          <span>Notes Master</span>
-        </button>
-        <button>
-          <img src="https://talk-time-server.herokuapp.com/online_tools.png" />
-          <span>Online Tools</span>
-        </button>
-        <button>
-          <img src="https://talk-time-server.herokuapp.com/problem_pauser.png" />
-          <span>Problem Pauser</span>
-        </button>
-        <button>
-          <img src="https://talk-time-server.herokuapp.com/questions.png" />
-          <span>Questions</span>
-        </button>
-        <button>
-          <img src="https://talk-time-server.herokuapp.com/ready_headset_go.png" />
-          <span>Ready Headset Go</span>
-        </button>
-        <button>
-          <img src="https://talk-time-server.herokuapp.com/resource_vs_impact.png" />
-          <span>Resource vs Impact</span>
-        </button>
-        <button>
-          <img src="https://talk-time-server.herokuapp.com/screenshare.png" />
-          <span>Screenshare</span>
-        </button>
-        <button>
-          <img src="https://talk-time-server.herokuapp.com/stay_on_topic.png" />
-          <span>Stay on Topic</span>
-        </button>
-        <button>
-          <img src="https://talk-time-server.herokuapp.com/teacher.png" />
-          <span>Teacher</span>
-        </button>
-        <button>
-          <img src="https://talk-time-server.herokuapp.com/time_earning.png" />
-          <span>Time Earning</span>
-        </button>
-        <button>
-          <img src="https://talk-time-server.herokuapp.com/to_do_tracker.png" />
-          <span>To Do Tracker</span>
-        </button>
-        <button>
-          <img src="https://talk-time-server.herokuapp.com/zen_enviroment.png" />
-          <span>Zen Evniroment</span>
-        </button>
+      <div class="badge-modal">
+        <div>
+          <img src="https://talk-time-server.onrender.com/active_listener3.png" />
+          <div class="span-wrapper">
+            <span>Active Listener</span>
+          </div>
+        </div>
+        <div>
+            <img src="https://talk-time-server.onrender.com/areas_of_agreement5.png" />
+            <div class="span-wrapper">
+              <span>Areas Of Agreement</span>
+            </div>
+        </div>
+        <div>
+          <img src="https://talk-time-server.onrender.com/ask_for_feedback3.png" />
+          <div class="span-wrapper">
+            <span>Ask For Feedback</span>
+          </div>
+        </div>
+      <div>
+        <img src="https://talk-time-server.onrender.com/bee_brief6.png" />
+        <div class="span-wrapper">
+          <span>Bee Brieef</span>
+        </div>
       </div>
+      <div>
+        <img src="https://talk-time-server.onrender.com/brainstormer5.png" />
+        <div class="span-wrapper">
+          <span>Brainstormer</span>
+        </div>
+      </div>
+      <div>
+        <img src="https://talk-time-server.onrender.com/check_for_understanding2.png" />
+        <div class="span-wrapper">
+          <span>Check For Understanding</span>
+        </div>
+      </div>
+      <div>
+        <img src="https://talk-time-server.onrender.com/clarifing_question4.png" />
+        <div class="span-wrapper">
+          <span>Clarifing Question</span>
+        </div>
+      </div>
+      <div>
+        <img src="https://talk-time-server.onrender.com/decide5.png" />
+        <div class="span-wrapper">
+          <span>Decide</span>
+        </div>
+      </div>
+      <div>
+        <img src="https://talk-time-server.onrender.com/define_the_problem7.png" />
+        <div class="span-wrapper">
+          <span>Define The Problem</span>
+        </div>
+      </div>
+      <div>
+        <img src="https://talk-time-server.onrender.com/disagreement_solver6.png" />
+        <div class="span-wrapper">
+          <span>Disagreement Solver</span>
+        </div>
+      </div>
+      <div>
+        <img src="https://talk-time-server.onrender.com/encourageing_knowlege7.png" />
+        <div class="span-wrapper">
+          <span>Encourageing Knowlege</span>
+        </div>
+      </div>
+      <div>
+        <img src="https://talk-time-server.onrender.com/give_feedback7.png" />
+        <div class="span-wrapper">
+          <span>Give Feedback</span>
+        </div>
+      </div>
+      <div>
+        <img src="https://talk-time-server.onrender.com/helper5.png" />
+        <div class="span-wrapper">
+          <span>Helper</span>
+        </div>
+      </div>
+      <div>
+        <img src="https://talk-time-server.onrender.com/ideas_evaluation7.png" />
+        <div class="span-wrapper">
+          <span>Ideas Evaluation</span>
+        </div>
+      </div>
+      <div>
+        <img src="https://talk-time-server.onrender.com/info_shareer4.png" />
+        <div class="span-wrapper">
+          <span>Info Shareer</span>
+        </div>
+      </div>
+      <div>
+        <img src="https://talk-time-server.onrender.com/mic_earned5.png" />
+        <div class="span-wrapper">
+          <span>Mic Earned</span>
+        </div>
+      </div>
+      <div>
+        <img src="https://talk-time-server.onrender.com/muting_maestro2.png" />
+        <div class="span-wrapper">
+          <span>Muting Maestro</span>
+        </div>
+      </div>
+      <div>
+        <img src="https://talk-time-server.onrender.com/norms_meeting5.png" />
+        <div class="span-wrapper">
+          <span>Norms Meeting</span>
+        </div>
+      </div>
+      <div>
+        <img src="https://talk-time-server.onrender.com/notes_master6.png" />
+        <div class="span-wrapper">
+          <span>Notes Master</span>
+        </div>
+      </div>
+      <div>
+        <img src="https://talk-time-server.onrender.com/online_tools6.png" />
+        <div class="span-wrapper">
+          <span>Online Tools</span>
+        </div>
+      </div>
+      <div>
+        <img src="https://talk-time-server.onrender.com/problem_pauser5.png" />
+        <div class="span-wrapper">
+          <span>Problem Pauser</span>
+        </div>
+      </div>
+      <div>
+        <img src="https://talk-time-server.onrender.com/questions3.png" />
+        <div class="span-wrapper">
+          <span>Questions</span>
+        </div>
+      </div>
+      <div>
+        <img src="https://talk-time-server.onrender.com/ready_headset_go4.png" />
+        <div class="span-wrapper">
+          <span>Ready Headset Go</span>
+        </div>
+      </div>
+      <div>
+        <img src="https://talk-time-server.onrender.com/resource_vs_impact6.png" />
+        <div class="span-wrapper">
+          <span>Resource Vs Impact</span>
+        </div>
+      </div>
+      <div>
+        <img src="https://talk-time-server.onrender.com/screenshare2.png" />
+        <div class="span-wrapper">
+          <span>Screenshare</span>
+        </div>
+      </div>
+      <div>
+        <img src="https://talk-time-server.onrender.com/stay_on_topic4.png" />
+        <div class="span-wrapper">
+          <span>Stay On Topic</span>
+        </div>
+      </div>
+      <div>
+        <img src="https://talk-time-server.onrender.com/teacher8.png" />
+        <div class="span-wrapper">
+          <span>Teacher</span>
+        </div>
+      </div>
+      <div>
+        <img src="https://talk-time-server.onrender.com/time_earning6.png" />
+        <div class="span-wrapper">
+          <span>Time Earning</span>
+        </div>
+      </div>
+      <div>
+        <img src="https://talk-time-server.onrender.com/to_do_tracker5.png" />
+        <div class="span-wrapper">
+          <span>To Do Tracker</span>
+        </div>
+      </div>
+      <div>
+        <img src="https://talk-time-server.onrender.com/zen_enviroment6.png" />
+        <div class="span-wrapper">
+          <span>Zen Enviroment</span>
+        </div>
+      </div>
+      </div>
+      <button class="close-badge-modal">Close</button>
     `
+    //https://talk-time-server.onrender.com/decide5.png
     modal.style.display = 'none'
     document.body.appendChild(modal)
   })()
@@ -492,12 +554,6 @@ window.onload = async function () {
   }
   setInterval(render, 1000);
 
-  // let loudlyModal = document.querySelector('.loudly');
-  // let closeLoudlyModal = document.querySelector('.loudly-close')
-  // closeLoudlyModal.onclick = function () {
-  //   loudlyModal.style.display = 'none'
-  // }
-
   // ==================================================================
   // SPEECH PROCESSING AND TIMING
   // ==================================================================
@@ -565,7 +621,7 @@ window.onload = async function () {
             percent
           })
         })
-        fetch(`https://talk-time-server.herokuapp.com/percentage/${parsed_URL}`, {
+        fetch(`${LINK}percentage/${parsed_URL}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -580,7 +636,7 @@ window.onload = async function () {
 
   let apiInterval = setInterval(() => {
     chrome.storage.local.get(["current_name"], async function (storage) {
-      await fetch('https://talk-time-server.herokuapp.com/')
+      await fetch(`${LINK}`)
         .then((response) => response.json())
         .then(async data => {
           let isMessagePresent = data.find(d => d.to === storage.current_name && d.url === parsed_URL)
@@ -603,22 +659,24 @@ window.onload = async function () {
     let allNames = document.querySelectorAll('.zWGUib');
     let allImgUrls = document.querySelectorAll('.KjWwNd');
     let users = [];
-    for (let i = 0; i < allNames.length; i++) {
-      users.push({
-        name: allNames[i].textContent,
-        url: parsed_URL,
-        img: allImgUrls[i].getAttribute('src')
-      })
-    }
-    fetch(`https://talk-time-server.herokuapp.com/feedbacks/${parsed_URL}`, {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Token': 'Bearer 580792'
-      },
-      body: JSON.stringify({
-        users
+    chrome.storage.local.get(["current_name"], async function (storage) {
+      for (let i = 0; i < allNames.length; i++) {
+        users.push({
+          name: allNames[i].textContent,
+          url: parsed_URL,
+          img: allImgUrls[i].getAttribute('src')
+        })
+      }
+      fetch(`${LINK}feedbacks/${parsed_URL}`, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Token': 'Bearer 580792'
+        },
+        body: JSON.stringify({
+          users
+        })
       })
     })
   }, 5000)
@@ -660,7 +718,7 @@ window.onload = async function () {
             chrome.storage.local.get(["current_name"], async function (storageFirst) {
               chrome.storage.local.get(["to_name"], async function (storageSecond) {
                 console.log(storageFirst.current_name, storageSecond.to_name)
-                await fetch('https://talk-time-server.herokuapp.com/add', {
+                await fetch(`${LINK}add`, {
                   method: 'POST',
                   headers: {
                     'Accept': 'application/json',
@@ -681,11 +739,11 @@ window.onload = async function () {
       }
 
       let openBadgeModalButtons = document.querySelectorAll('.give-badge-button')
-      let badgeModal = document.querySelector('.badge-modal')
+      let badgeModal = document.querySelector('.badge-modal-wrapper')
       let closeBadgeModal = document.querySelector('.close-badge-modal')
       openBadgeModalButtons.forEach(button => {
         button.onclick = function () {
-          badgeModal.style.display = 'block'
+          badgeModal.style.display = 'flex'
           let attr = this.parentElement.getAttribute('data-name')
           chrome.storage.local.set({ "badge_name": attr })
         }
@@ -697,13 +755,14 @@ window.onload = async function () {
         }
       }
 
-      let badgesButtons = document.querySelectorAll('.badge-modal-body > button');
-      badgesButtons.forEach(button => {
-        button.onclick = function () {
+      let badgesButtons = document.querySelectorAll('.badge-modal > div');
+      badgesButtons.forEach(div => {
+        div.onclick = function () {
           chrome.storage.local.get(["badge_name"], async function (storage) {
-            let img = button.querySelector('img')
+            let img = div.querySelector('img')
             let src = img.src.split('/').at(-1)
-            fetch(`https://talk-time-server.herokuapp.com/givebadge/${storage.badge_name}`, {
+            console.log(src)
+            fetch(`${LINK}givebadge/${parsed_URL}/${storage.badge_name}`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json'
@@ -712,6 +771,7 @@ window.onload = async function () {
                 badge: src
               })
             })
+            badgeModal.style.display = 'none'
           })
         }
       })
@@ -733,6 +793,21 @@ window.onload = async function () {
         });
       }
 
+      const meetingGeneralName = document.querySelector('.u6vdEc')
+      if (!generalFlag) {
+        fetch(`${LINK}addgeneral`, {
+          method: "POST",
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            name: meetingGeneralName.textContent,
+            meetUrl: parsed_URL
+          })
+        })
+        generalFlag = true;
+      }
+
       const closeBadInternetModal = document.querySelector('.close-bad-internet-modal')
       const badInternetModal = document.querySelector('.bad-internet-connection')
       if (closeBadInternetModal) {
@@ -750,7 +825,7 @@ window.onload = async function () {
 
 
       chrome.storage.local.get(["current_name"], async function (storage) {
-        let vadLink = `https://talk-time-server.herokuapp.com/vad/${parsed_URL}/${storage.current_name}`
+        let vadLink = `${LINK}vad/${parsed_URL}/${storage.current_name}`
         let vadElement = document.querySelector('.vad-link');
         if (!vadElement) {
           let a = $el('a')
@@ -773,7 +848,7 @@ window.onload = async function () {
       if (messageAlert) {
         document.querySelector('.close-message-alert').onclick = function () {
           chrome.storage.local.get(["current_name"], async function (storage) {
-            await fetch('https://talk-time-server.herokuapp.com/', {
+            await fetch(`${LINK}`, {
               method: 'DELETE',
               headers: {
                 'Content-type': 'application/json'
@@ -796,7 +871,7 @@ window.onload = async function () {
             if (child.className === 'talk-time-name') {
               if (child.textContent === storage.current_name) {
                 allTr[i].querySelector('.send-message-button').disabled = true;
-                // allTr[i].querySelector('.give-badge-button').disabled = true;
+                allTr[i].querySelector('.give-badge-button').disabled = true;
               }
             }
           }
@@ -820,9 +895,6 @@ window.onload = async function () {
       for (let i = 0; i < usersTalkingInformation.length; i++) {
         buttons[i].onclick = function () {
           chrome.storage.local.set({ "to_name": names[i] })
-          chrome.storage.local.get(["to_name"], function (storage) {
-            console.log(storage.to_name)
-          })
           if (!document.querySelector('.modal')) {
             createSendMessageModal(names[i])
             document.querySelector('.modal').className = 'modal'
