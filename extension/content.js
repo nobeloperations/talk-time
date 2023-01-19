@@ -1,7 +1,7 @@
 window.onload = async function () {
   chrome.storage.local.set({ "background": "#08AB67" })
   const parsed_URL = window.location.href.split('/').slice(-1).toString().slice(0, 12);
-  const LINK = 'https://talk-time-server.onrender.com/'
+  const LINK = 'http://localhost:3000/'
   let generalFlag = false;
 
 
@@ -462,13 +462,23 @@ window.onload = async function () {
   // ==================================================================
   // DOM UPDATES
   // ==================================================================
+  let secondsInterval;
   function talking(record) {
     record.talking = true;
     if (record && record.row && record.row.classList) {
+      let i = 0;
+      secondsInterval = setInterval(() => {
+        i = (i % 360) + 1
+        if(i > 30) {
+          console.log('asdfjal;kdjf l;kadjf;lkasdj fl;kasdj fl;kad')
+        }
+        console.log(i)
+      }, 1000)
       record.row.classList.add("talking");
     }
   }
   function notTalking(record) {
+    clearInterval(secondsInterval)
     record.talking = false;
     if (record && record.row && record.row.classList) {
       record.row.classList.remove("talking");
