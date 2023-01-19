@@ -1,7 +1,7 @@
 window.onload = async function () {
   chrome.storage.local.set({ "background": "#08AB67" })
   const parsed_URL = window.location.href.split('/').slice(-1).toString().slice(0, 12);
-  const LINK = 'http://localhost:3000/'
+  const LINK = 'https://talk-time-server.onrender.com/'
   let generalFlag = false;
 
 
