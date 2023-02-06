@@ -804,7 +804,7 @@ window.onload = async function () {
 
       const meetingGeneralName = document.querySelector('.u6vdEc')
       if (!generalFlag) {
-        fetch(`${LINK}main/addgeneral`, {
+        fetch(`${LINK}addgeneral`, {
           method: "POST",
           headers: {
             'Content-Type': 'application/json'
