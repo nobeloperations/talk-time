@@ -882,8 +882,8 @@ window.onload = async function () {
             let child = allTr[i].children[j]
             if (child.className === 'talk-time-name') {
               if (child.textContent === storage.current_name) {
-                // allTr[i].querySelector('.send-message-button').disabled = true;
-                // allTr[i].querySelector('.give-badge-button').disabled = true;
+                allTr[i].querySelector('.send-message-button').disabled = true;
+                allTr[i].querySelector('.give-badge-button').disabled = true;
               }
             }
           }
