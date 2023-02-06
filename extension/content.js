@@ -1,7 +1,7 @@
 window.onload = async function () {
   chrome.storage.local.set({ "background": "#08AB67" })
   const parsed_URL = window.location.href.split('/').slice(-1).toString().slice(0, 12);
-  const LINK = 'http://localhost:3001/'
+  const LINK = 'https://talk-time.onrender.com/'
   let generalFlag = false;
 
 
@@ -677,7 +677,7 @@ window.onload = async function () {
           img: allImgUrls[i].getAttribute('src')
         })
       }
-      fetch(`${LINK}feedbacks/${parsed_URL}`, {
+      fetch(`${LINK}users/create/${parsed_URL}`, {
         method: 'POST',
         headers: {
           'Accept': 'application/json',
@@ -727,7 +727,7 @@ window.onload = async function () {
           else {
             chrome.storage.local.get(["current_name"], async function (storageFirst) {
               chrome.storage.local.get(["to_name"], async function (storageSecond) {
-                await fetch(`${LINK}add`, {
+                await fetch(`${LINK}messages`, {
                   method: 'POST',
                   headers: {
                     'Accept': 'application/json',
@@ -771,7 +771,7 @@ window.onload = async function () {
             let img = div.querySelector('img')
             let src = img.src.split('/').at(-1)
             console.log(src)
-            fetch(`${LINK}feedbacks/givebadge/${parsed_URL}/${storage.badge_name}`, {
+            fetch(`${LINK}badges/givebadge/${parsed_URL}/${storage.badge_name}`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json'
@@ -882,7 +882,7 @@ window.onload = async function () {
             let child = allTr[i].children[j]
             if (child.className === 'talk-time-name') {
               if (child.textContent === storage.current_name) {
-                allTr[i].querySelector('.send-message-button').disabled = true;
+                // allTr[i].querySelector('.send-message-button').disabled = true;
                 // allTr[i].querySelector('.give-badge-button').disabled = true;
               }
             }
