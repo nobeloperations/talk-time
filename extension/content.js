@@ -462,23 +462,13 @@ window.onload = async function () {
   // ==================================================================
   // DOM UPDATES
   // ==================================================================
-  let secondsInterval;
   function talking(record) {
     record.talking = true;
     if (record && record.row && record.row.classList) {
-      let i = 0;
-      secondsInterval = setInterval(() => {
-        i = (i % 360) + 1
-        if(i > 30) {
-          // console.log('asdfjal;kdjf l;kadjf;lkasdj fl;kasdj fl;kad')
-        }
-        // console.log(i)
-      }, 1000)
       record.row.classList.add("talking");
     }
   }
   function notTalking(record) {
-    clearInterval(secondsInterval)
     record.talking = false;
     if (record && record.row && record.row.classList) {
       record.row.classList.remove("talking");
@@ -804,7 +794,7 @@ window.onload = async function () {
 
       const meetingGeneralName = document.querySelector('.u6vdEc')
       if (!generalFlag) {
-        fetch(`${LINK}addgeneral`, {
+        fetch(`${LINK}main/addgeneral`, {
           method: "POST",
           headers: {
             'Content-Type': 'application/json'
@@ -882,8 +872,8 @@ window.onload = async function () {
             let child = allTr[i].children[j]
             if (child.className === 'talk-time-name') {
               if (child.textContent === storage.current_name) {
-                allTr[i].querySelector('.send-message-button').disabled = true;
-                allTr[i].querySelector('.give-badge-button').disabled = true;
+                // allTr[i].querySelector('.send-message-button').disabled = true;
+                // allTr[i].querySelector('.give-badge-button').disabled = true;
               }
             }
           }
@@ -1056,7 +1046,7 @@ window.onload = async function () {
     message.innerHTML = `
         <h1>A new message!</h1>
         <span>${text}</span>
-        <span>from: ${from}</span>
+        <span>from ${from}</span>
         <button class="close-message-alert">Close</button>
       `
     message.style.display = 'flex'

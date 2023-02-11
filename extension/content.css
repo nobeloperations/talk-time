@@ -278,21 +278,10 @@ td.talk-time-pct {
 .talk-time-group-table {
     display: none;
 }
-
-.talk-to-much-message {
-    display: flex;
-    color: rgb(102, 102, 102);
-    background: white;
-    width: 100%;
-    font-size: 14px;
-    width: calc(100% - 5px);
-    padding-left: 5px;
-}
-
 .modal {
     font-family: Arial, Helvetica, sans-serif;
-    height: 300px;
-    width: 600px;
+    height: 250px;
+    width: 500px;
     position: fixed;
     top: 50%;
     left: 50%;
@@ -304,6 +293,7 @@ td.talk-time-pct {
     align-items: center;
     flex-direction: column;
     z-index: 99999999999;
+    text-align: center;
 }
 
 .modal h2,
@@ -315,14 +305,24 @@ td.talk-time-pct {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    width: 320px;
+    width: 270px;
     height: auto;
 }
+.modal-send:hover {
+    background: transparent;
+    color: rgb(44, 202, 110);
+    border: 1px solid rgb(44, 202, 110);
+}
 
+.modal-cancel:hover {
+    background: transparent;
+    color: tomato;
+    border: 1px solid tomato;
+}
 .modal-send,
 .modal-cancel {
     height: 40px;
-    width: 150px;
+    width: 130px;
     color: white;
     font-size: 16px;
     cursor: pointer;
@@ -336,6 +336,23 @@ td.talk-time-pct {
 
 .modal-cancel {
     background: tomato;
+}
+.modal-message {
+    width: 270px;
+    height: 40px;
+    border: 1px solid black;
+    outline: none;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+.talk-to-much-message {
+    display: flex;
+    color: rgb(102, 102, 102);
+    background: white;
+    width: 100%;
+    font-size: 14px;
+    width: calc(100% - 5px);
+    padding-left: 5px;
 }
 
 .hidden {
@@ -362,33 +379,12 @@ td.talk-time-pct {
     background: rgb(0, 126, 215);
 }
 
-.modal-send:hover {
-    background: transparent;
-    color: rgb(44, 202, 110);
-    border: 1px solid rgb(44, 202, 110);
-}
-
-.modal-cancel:hover {
-    background: transparent;
-    color: tomato;
-    border: 1px solid tomato;
-}
-
-.modal-message {
-    width: 300px;
-    height: 40px;
-    border: 1px solid black;
-    outline: none;
-    padding: 10px;
-    margin-bottom: 10px;
-}
-
 .message-alert {
     width: 400px;
     height: auto;
     background: white;
     position: fixed;
-    top: calc(0% + 130px);
+    top: calc(0% + 100px);
     left: 50%;
     transform: translate(-50%, -50%);
     z-index: 999999;
@@ -396,12 +392,13 @@ td.talk-time-pct {
     align-items: center;
     justify-content: center;
     flex-direction: column;
-    box-shadow: 0px 0px 15px -6px #000000;
+    box-shadow: 0px 0px 10px 1px rgba(0, 0, 0, 0.13);
     padding-bottom: 10px;
+    border-radius: 10px;
 }
 
 .message-alert h1 {
-    margin: 10px;
+    margin: 5px;
 }
 
 .message-alert span {
@@ -416,12 +413,13 @@ td.talk-time-pct {
     outline: none;
     background: tomato;
     border: 1px solid tomato;
-    height: 40px;
+    height: 35px;
     width: 120px;
     color: white;
-    font-size: 16px;
+    font-size: 14px;
     cursor: pointer;
     transition: all .4s ease;
+    border-radius: 5px;
 }
 
 .message-alert button:hover {
@@ -429,50 +427,12 @@ td.talk-time-pct {
     color: tomato;
 }
 
-.bad-internet-connection {
-    position: fixed;
-    top: calc(0% + 80px);
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 999999;
-    width: 400px;
-    height: 140px;
-    background: white;
-    border-radius: 10px;
-    box-shadow: 0px 0px 10px 1px rgba(0, 0, 0, 0.13);
-    justify-content: center;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-}
-
-.disbalance {
-    height: 160px;
-}
-
-.loudly,
-.disbalance {
-    display: flex;
-}
-
-.loudly h2,
-.disbalance h2 {
-    margin: 0;
-    margin-bottom: 10px;
-}
-
-.loudly span,
-.disbalance span {
-    margin-bottom: 10px;
-}
 
 .bad-internet-connection>span {
     margin-bottom: 10px;
 }
 
-.bad-internet-connection>button,
-.loudly button,
-.disbalance button {
+.bad-internet-connection>button {
     border: none;
     outline: none;
     height: 30px;
@@ -483,7 +443,23 @@ td.talk-time-pct {
     color: white;
     cursor: pointer;
 }
-
+.bad-internet-connection {
+    display: flex;
+    position: fixed;
+    top: calc(0% + 80px);
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 999999;
+    width: 280px;
+    height: 120px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px 1px rgba(0, 0, 0, 0.13);
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
 button:disabled {
     background-color: #cccccc !important;
     border: 1px solid #cccccc !important;
