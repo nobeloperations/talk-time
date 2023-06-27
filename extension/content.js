@@ -1,1056 +1,964 @@
+
 window.onload = async function () {
-  chrome.storage.local.set({ "background": "#08AB67" })
+
+  let tagsAdded = []
+
+  let badgeModalWrapper, messageAlert, badges, badgeSearchInput, messageInput, sendMessageModal, badInternetModal, notesModal, tags, noTagsSpan, topicModal, topicInput, optionButtonsMarkUp, modalShadow;
+
   const parsed_URL = window.location.href.split('/').slice(-1).toString().slice(0, 12);
-  const LINK = 'https://talk-time.onrender.com/'
-  let generalFlag = false;
+  const LINK = 'https://nobeltt.com/'
+  const DATE = new Date().toISOString().split('T')[0]
+  const body = document.querySelector('body');
 
-
-  function $el(tag, props) {
-    let p, el = document.createElement(tag);
-    if (props) {
-      for (p in props) {
-        el[p] = props[p];
+  const eventSource = new EventSource('https://adventurous-glorious-actor.glitch.me/stream-messages');
+  eventSource.onmessage = (event) => {
+    const message = JSON.parse(event.data);
+    const messageModal = document.querySelector('.message-alert')
+    const modalShadow = document.querySelector('.modal-shadow')
+    const messageAvatar = document.querySelector('.message-avatar')
+    const messageElem = messageModal.querySelector('.message')
+    const messageFrom = messageModal.querySelector('.message-from')
+    messageElem.innerHTML = message.message
+    chrome.storage.local.get(["current_name"], function (storageFirst) {
+      if (message.type === 'CHAT') {
+        if (message.to === storageFirst.current_name && message.url === parsed_URL) {
+          fetch(`${LINK}users/${message.name}`)
+            .then(res => res.json())
+            .then(response => {
+              messageAvatar.src = response.avatar
+              modalShadow.style.display = 'flex'
+              messageFrom.innerHTML = message.name
+              messageModal.style.display = 'flex'
+            })
+        }
       }
-    }
-    return el;
-  }
+      else if (message.type === 'TOPIC') {
+        if (message.url === parsed_URL && message.date === DATE) {
+          messageFrom.innerHTML = 'Topic change'
+          messageModal.style.display = 'flex'
+          modalShadow.style.display = 'flex'
+          const currTopic = document.querySelector('.curr-topic')
+          currTopic.innerHTML = message.message;
 
-  (function () {
-    let modal = $el('div', {});
-    modal.className = 'badge-modal-wrapper'
-    modal.innerHTML = `
-      <div class="badge-modal">
-        <div>
-          <img src="https://talk-time-server.onrender.com/img/active_listener3.png" />
-          <div class="span-wrapper">
-            <span>Active Listener</span>
-          </div>
-        </div>
-        <div>
-            <img src="https://talk-time-server.onrender.com/img/areas_of_agreement5.png" />
-            <div class="span-wrapper">
-              <span>Areas Of Agreement</span>
-            </div>
-        </div>
-        <div>
-          <img src="https://talk-time-server.onrender.com/img/ask_for_feedback3.png" />
-          <div class="span-wrapper">
-            <span>Ask For Feedback</span>
-          </div>
-        </div>
-      <div>
-        <img src="https://talk-time-server.onrender.com/img/bee_brief6.png" />
-        <div class="span-wrapper">
-          <span>Bee Brieef</span>
-        </div>
-      </div>
-      <div>
-        <img src="https://talk-time-server.onrender.com/img/brainstormer5.png" />
-        <div class="span-wrapper">
-          <span>Brainstormer</span>
-        </div>
-      </div>
-      <div>
-        <img src="https://talk-time-server.onrender.com/img/check_for_understanding2.png" />
-        <div class="span-wrapper">
-          <span>Check For Understanding</span>
-        </div>
-      </div>
-      <div>
-        <img src="https://talk-time-server.onrender.com/img/clarifing_question4.png" />
-        <div class="span-wrapper">
-          <span>Clarifing Question</span>
-        </div>
-      </div>
-      <div>
-        <img src="https://talk-time-server.onrender.com/img/decide5.png" />
-        <div class="span-wrapper">
-          <span>Decide</span>
-        </div>
-      </div>
-      <div>
-        <img src="https://talk-time-server.onrender.com/img/define_the_problem7.png" />
-        <div class="span-wrapper">
-          <span>Define The Problem</span>
-        </div>
-      </div>
-      <div>
-        <img src="https://talk-time-server.onrender.com/img/disagreement_solver6.png" />
-        <div class="span-wrapper">
-          <span>Disagreement Solver</span>
-        </div>
-      </div>
-      <div>
-        <img src="https://talk-time-server.onrender.com/img/encourageing_knowlege7.png" />
-        <div class="span-wrapper">
-          <span>Encourageing Knowlege</span>
-        </div>
-      </div>
-      <div>
-        <img src="https://talk-time-server.onrender.com/img/give_feedback7.png" />
-        <div class="span-wrapper">
-          <span>Give Feedback</span>
-        </div>
-      </div>
-      <div>
-        <img src="https://talk-time-server.onrender.com/img/helper5.png" />
-        <div class="span-wrapper">
-          <span>Helper</span>
-        </div>
-      </div>
-      <div>
-        <img src="https://talk-time-server.onrender.com/img/ideas_evaluation7.png" />
-        <div class="span-wrapper">
-          <span>Ideas Evaluation</span>
-        </div>
-      </div>
-      <div>
-        <img src="https://talk-time-server.onrender.com/img/info_shareer4.png" />
-        <div class="span-wrapper">
-          <span>Info Shareer</span>
-        </div>
-      </div>
-      <div>
-        <img src="https://talk-time-server.onrender.com/img/mic_earned5.png" />
-        <div class="span-wrapper">
-          <span>Mic Earned</span>
-        </div>
-      </div>
-      <div>
-        <img src="https://talk-time-server.onrender.com/img/muting_maestro2.png" />
-        <div class="span-wrapper">
-          <span>Muting Maestro</span>
-        </div>
-      </div>
-      <div>
-        <img src="https://talk-time-server.onrender.com/img/norms_meeting5.png" />
-        <div class="span-wrapper">
-          <span>Norms Meeting</span>
-        </div>
-      </div>
-      <div>
-        <img src="https://talk-time-server.onrender.com/img/notes_master6.png" />
-        <div class="span-wrapper">
-          <span>Notes Master</span>
-        </div>
-      </div>
-      <div>
-        <img src="https://talk-time-server.onrender.com/img/online_tools6.png" />
-        <div class="span-wrapper">
-          <span>Online Tools</span>
-        </div>
-      </div>
-      <div>
-        <img src="https://talk-time-server.onrender.com/img/problem_pauser5.png" />
-        <div class="span-wrapper">
-          <span>Problem Pauser</span>
-        </div>
-      </div>
-      <div>
-        <img src="https://talk-time-server.onrender.com/img/questions3.png" />
-        <div class="span-wrapper">
-          <span>Questions</span>
-        </div>
-      </div>
-      <div>
-        <img src="https://talk-time-server.onrender.com/img/ready_headset_go4.png" />
-        <div class="span-wrapper">
-          <span>Ready Headset Go</span>
-        </div>
-      </div>
-      <div>
-        <img src="https://talk-time-server.onrender.com/img/resource_vs_impact6.png" />
-        <div class="span-wrapper">
-          <span>Resource Vs Impact</span>
-        </div>
-      </div>
-      <div>
-        <img src="https://talk-time-server.onrender.com/img/screenshare2.png" />
-        <div class="span-wrapper">
-          <span>Screenshare</span>
-        </div>
-      </div>
-      <div>
-        <img src="https://talk-time-server.onrender.com/img/stay_on_topic4.png" />
-        <div class="span-wrapper">
-          <span>Stay On Topic</span>
-        </div>
-      </div>
-      <div>
-        <img src="https://talk-time-server.onrender.com/img/teacher8.png" />
-        <div class="span-wrapper">
-          <span>Teacher</span>
-        </div>
-      </div>
-      <div>
-        <img src="https://talk-time-server.onrender.com/img/time_earning6.png" />
-        <div class="span-wrapper">
-          <span>Time Earning</span>
-        </div>
-      </div>
-      <div>
-        <img src="https://talk-time-server.onrender.com/img/to_do_tracker5.png" />
-        <div class="span-wrapper">
-          <span>To Do Tracker</span>
-        </div>
-      </div>
-      <div>
-        <img src="https://talk-time-server.onrender.com/img/zen_enviroment6.png" />
-        <div class="span-wrapper">
-          <span>Zen Enviroment</span>
-        </div>
-      </div>
-      </div>
-      <button class="close-badge-modal">Close</button>
-    `
-    //https://talk-time-server.onrender.com/decide5.png
-    modal.style.display = 'none'
-    document.body.appendChild(modal)
+        }
+      }
+      else if (message.type === 'BADGE') {
+        if (message.url === parsed_URL && message.date === DATE && storageFirst.current_name === message.to) {
+          messageFrom.innerHTML = 'New badge!'
+          messageModal.style.display = 'flex'
+          modalShadow.style.display = 'flex'
+        }
+      }
+    })
+  };
+
+  (async () => {
+    const { createBadgesModal, createSendMessageModal, createBadInternetModal, createMessageModal, createNotesModal, createTopicModal, optionButtons, createShadowModal } = await import(chrome.runtime.getURL('./resources/html.js'));
+    const badInternetModalImage = chrome.runtime.getURL("./resources/warning.png")
+    createBadgesModal(document.body);
+    createSendMessageModal(document.body);
+    createBadInternetModal(document.body, badInternetModalImage);
+    createMessageModal(document.body);
+    createNotesModal(document.body);
+    createTopicModal(document.body);
+    createShadowModal(document.body);
+    optionButtonsMarkUp = optionButtons
   })()
+    .then(() => {
+      badgeModalWrapper = document.querySelector('.badge-modal-wrapper')
+      messageInput = document.querySelector('.badge-search')
+      badges = document.querySelectorAll('.badge-item')
+      badgeSearchInput = document.querySelector('.badge-search')
+      sendMessageModal = document.querySelector('.send-message-modal')
+      messageInput = document.querySelector('.modal-message')
+      badInternetModal = document.querySelector('.bad-internet-connection')
+      messageAlert = document.querySelector('.message-alert')
+      notesModal = document.querySelector('.notes-modal')
+      tags = document.querySelector('.tags')
+      topicModal = document.querySelector('.topic-modal')
+      topicInput = document.querySelector('.topic-input')
+      noTagsSpan = document.querySelector('.no-tags')
+      modalShadow = document.querySelector('.modal-shadow')
+    })
+    .then(() => {
+      function addUser(arr) {
+        Array.from(arr).forEach(user => {
+          const userInfo = user.querySelector('.SKWIhd')
+          const userAvatar = userInfo.querySelector('.BEaVse > img')
+          const userName = userInfo.querySelector('.zSX24d > .jKwXVe > .zWGUib')
+          console.log(1)
 
-
-  const createSendMessageModal = (username) => {
-    let modal = $el('div', {});
-    modal.className = 'modal hidden'
-    modal.innerHTML = `
-        <h2 class="modal-title">Do you want send message to the ${username}?</h2>
-        <input class="modal-message" placeholder="Enter your message" maxlength="200" name="message" />
-        <div>
-          <button class="modal-send">Send Message</button>
-          <button class="modal-cancel">Cancel</button>
-        </div>
-    `
-    document.querySelector('body').appendChild(modal)
-  }
-  // Default config
-  // These values may be overridden by values retrieved from server
-  let config = {
-    participants_selector: 'div[role="list"][aria-label="Participants"]',
-    pulse_timeslice: 500,
-    min_talk_time_to_show: 2000
-  };
-  let options = {};
-  let data = {};
-  let participants_list = null;
-  let totaltalktime = 0;
-  let groups = {
-    "a": { "participants": {} },
-    "b": { "participants": {} },
-    "c": { "participants": {} },
-    "d": { "participants": {} }
-  };
-  let update_display_required = false;
-
-  let dom_container = null;
-  let dom_table = null;
-  let dom_total = null;
-
-  // ==================================================================
-  // UTIL
-  // ==================================================================
-
-  // UTIL: DOM
-  // ---------
-  function parent(el, selector) {
-    //console.log("parent",el);
-    if (el.matches && el.matches(selector)) { return el; }
-    if (el.parentNode) { return parent(el.parentNode, selector); }
-    return null;
-  }
-
-  // UTIL: TIME FORMATTING
-  // ---------------------
-  function formatTime(t) {
-    try {
-      if (!t) {
-        return "";
-      }
-      let m = Math.floor(t / 60);
-      let s = Math.floor(t - (m * 60));
-      return m + " : " + (("" + s).replace(/^(\d)$/, "0$1"));
-    } catch (e) {
-      console.log(e);
-      return "";
-    }
-  }
-  function getFormattedTotalTime(record) {
-    if (!record || !record.total) { return ""; }
-    return formatTime(record.total / 1000);
-  }
-  function getFormattedTotalPercent(record) {
-    if (!record || !record.total || !totaltalktime) { return ""; }
-    let pctstr = "";
-    if (record.total && totaltalktime) {
-      let pct = (record.total / totaltalktime) * 100;
-      if (pct > 100) { pct = 100; } // somehow?
-      pctstr = pct.toFixed(0) + "%";
-    }
-    return pctstr;
-  }
-
-  // ==================================================================
-  // DOM CREATION
-  // ==================================================================
-
-  // The container for the UI
-  function createContainer() {
-    dom_container = $el('div', { id: "talk-time-container" });
-    dom_container.innerHTML = `
-    <div class="talk-time-top" title="Click to collapse/expand">
-      <img class="talk-time-logo" style=" filter: grayscale(1) invert(1);" src="https://cdn-icons-png.flaticon.com/24/1827/1827379.png" />
-      <svg class="talk-time-options-gear" title="Talk Time Options" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M24 13.616v-3.232c-1.651-.587-2.694-.752-3.219-2.019v-.001c-.527-1.271.1-2.134.847-3.707l-2.285-2.285c-1.561.742-2.433 1.375-3.707.847h-.001c-1.269-.526-1.435-1.576-2.019-3.219h-3.232c-.582 1.635-.749 2.692-2.019 3.219h-.001c-1.271.528-2.132-.098-3.707-.847l-2.285 2.285c.745 1.568 1.375 2.434.847 3.707-.527 1.271-1.584 1.438-3.219 2.02v3.232c1.632.58 2.692.749 3.219 2.019.53 1.282-.114 2.166-.847 3.707l2.285 2.286c1.562-.743 2.434-1.375 3.707-.847h.001c1.27.526 1.436 1.579 2.019 3.219h3.232c.582-1.636.75-2.69 2.027-3.222h.001c1.262-.524 2.12.101 3.698.851l2.285-2.286c-.744-1.563-1.375-2.433-.848-3.706.527-1.271 1.588-1.44 3.221-2.021zm-12 2.384c-2.209 0-4-1.791-4-4s1.791-4 4-4 4 1.791 4 4-1.791 4-4 4z"/></svg>
-    </div>
-    <div class="talk-time-options-content">
-      <h3>Options</h3>
-      <p style="font-style:italic;">Change color of talk time</p>
-      <input type="color" class="change_color_input" /><br />
-      <button class="talk-time-options-close">Close</button>
-    </div>
-    <div class="talk-time-header">
-      <div class="talk-time-show-groups">Show Groups</div>
-      <div class="talk-time-hide-groups">Hide Groups</div>
-      <div class="talk-time-summary">Total Talk Time: <span id="talk-time-summary-total"></span></div>
-    </div>
-    <div class="talk-time-body">
-      <table class="talk-time-table"><tbody></tbody></table>
-      ${createGroupTable()}
-    </div>
-  `;
-    document.body.appendChild(dom_container);
-    dom_table = dom_container.querySelector('table');
-    dom_total = dom_container.querySelector('#talk-time-summary-total');
-    let onclick = function (selector, f) {
-      dom_container.querySelector(selector).addEventListener('click', f);
-    };
-    onclick('.talk-time-top', () => { dom_container.classList.toggle("collapsed"); });
-    onclick('.talk-time-show-groups', () => { dom_container.classList.add('show_groups'); });
-    onclick('.talk-time-hide-groups', () => { dom_container.classList.remove('show_groups'); });
-    onclick('.talk-time-options-gear', (e) => {
-      e.stopPropagation();
-      dom_container.classList.add('talk-time-options');
-      let changeColorInput = document.querySelector('.change_color_input');
-      changeColorInput.onchange = function () {
-        chrome.storage.local.set({ "background": this.value });
-        chrome.storage.local.get(['background'], function (storage) {
-          let { background } = storage;
-          const allSendMessageButtons = document.querySelectorAll('.send-message-button');
-          allSendMessageButtons.forEach(button => {
-            if (!button.disabled) {
-              button.style.background = background;
-              button.style.border = `1px solid ${background}`;
-            }
+          fetch(`${LINK}users/create/${parsed_URL}/${DATE}`, {
+            method: 'POST',
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json',
+              'Token': 'Bearer 580792'
+            },
+            body: JSON.stringify({
+              name: userName.textContent,
+              avatar: userAvatar.src,
+              date: DATE
+            })
           })
-          let talkTimeTop = document.querySelector('.talk-time-top');
-          let closeOptionsButton = document.querySelector('.talk-time-options-close')
-          talkTimeTop.style.background = background;
-          closeOptionsButton.style.background = background;
         })
       }
 
-    });
-    onclick('.talk-time-options-close', () => { dom_container.classList.remove("talk-time-options"); });
-  }
+      let optionsObserver = new MutationObserver(function (mutations) {
+        for (mutation of mutations) {
+          if (mutation.addedNodes[0]?.className === 'pw1uU') {
+            const optionsWrapper = document.querySelector('ul[aria-label="Call options"')
+            const addedWrapper = document.querySelector('.options-added-wrapper')
 
-  // Create the group rendering table
-  function createGroupTable() {
-    let table = `<table id="talk-time-group-table" class="talk-time-table talk-time-group-table"><tbody>`;
-    ['a', 'b', 'c', 'd'].forEach(group => {
-      table += `
-    <tr id="talk-time-group-row-${group}" class="talk-time-group-row">
-      <td><div contenteditable="true" title="Click to edit label" class="talk-time-group-label talk-time-group-selector-${group}">${group.toUpperCase()}</div></td>
-      <td id="talk-time-group-total-${group}" class="talk-time-group-total talk-time-time"></td>
-      <td id="talk-time-group-pct-${group}" class="talk-time-group-pct talk-time-pct"></td>
-      <td>Avg/person: </td>
-      <td id="talk-time-group-avg-${group}" class="talk-time-group-avg talk-time-avg"></td>
-    </tr>`;
-    });
-    table += `</tbody></table>`;
-    return table;
-  }
+            if (optionsWrapper && !addedWrapper) {
+              const addedWrapperEl = document.createElement('div')
+              addedWrapperEl.className = 'options-added-wrapper'
+              addedWrapperEl.innerHTML = optionButtonsMarkUp
 
-  // A participant's row
-  function createParticipantRow(record) {
-    if (!record) { return; }
-    let row = $el('tr');
-    row.setAttribute('data-name', record.name)
-    row.innerHTML = `
-        <td class="talk-time-name">${record.name}</td>
-        <td class="talk-time-time">0:00</td>
-        <td class="talk-time-pct unique_pct_selector">0%</td>
-        <button class="send-message-button">Send Message</button>
-        <button class="give-badge-button">Give Badge</button>
-        <td class="talk-time-groups">${createParticipantRowGroups(record)}</td>
-      `;
-    record.row = row;
-    record.time_display = row.querySelector('.talk-time-time');
-    record.pct_display = row.querySelector('.talk-time-pct');
-    // Attach click listeners to the groups
-    row.querySelectorAll('.talk-time-group-selector-container > *').forEach(el => {
-      el.addEventListener('click', () => {
-        let group = el.dataset.group;
-        let selected = !el.classList.contains('selected');
-        el.classList.toggle('selected', selected);
-        groups[group].participants[record.id] = selected;
-        // Force an immediate re-rendering of groups summary because data may have changed
-        updateGroupTotals();
-      })
-    });
-    return row;
-  }
+              optionsWrapper.prepend(addedWrapperEl)
+              const topicWrapper = document.querySelector('.topic-wrapper')
+              const noteWrapper = document.querySelector('.note-wrapper')
 
-  // Create the group selectors that go into each participant's row
-  function createParticipantRowGroups() {
-    return `
-    <div class="talk-time-group-selector-container" title="Click groups to add this participant's time to a group bucket">
-      <div class="talk-time-group-selector talk-time-group-selector-a" data-group="a">A</div>
-      <div class="talk-time-group-selector talk-time-group-selector-b" data-group="b">B</div>
-      <div class="talk-time-group-selector talk-time-group-selector-c" data-group="c">C</div>
-      <div class="talk-time-group-selector talk-time-group-selector-d" data-group="d">D</div>
-    </div>
-    `;
-  }
+              topicWrapper.onclick = function () {
+                modalShadow.style.display = 'flex'
+                topicModal.style.display = 'flex'
+                optionsWrapper.style.display = 'none'
+              }
 
-  // ==================================================================
-  // DATA PROCESSING
-  // ==================================================================
+              noteWrapper.onclick = function () {
+                modalShadow.style.display = 'flex'
+                notesModal.style.display = 'block'
+                optionsWrapper.style.display = 'none'
+              }
 
-  // Init a participant the first time we hear from them
-  // ---------------------------------------------------
-  function init_participant(id) {
-    let record = {
-      "id": id,
-      "total": 0,
-      "last_start": 0,
-      "last": 0,
-      "name": "",
-      "time_display": null,
-      "pct_display": null,
-      "update_required": false,
-      "groups": {},
-      "visible": false
-    };
-    getParticipantName(record);
-    return record;
-  }
-
-  // Retrieve a participant's name from the DOM
-  // ------------------------------------------
-  function getParticipantName(record) {
-    if (!record || !record.id || record.name) { return; }
-    const listitem = document.querySelector(`div[role="listitem"][data-participant-id="${record.id}"]`);
-    if (listitem) {
-      // The first span in the container has the name
-      const spans = listitem.querySelectorAll('span');
-      if (spans && spans.length) {
-        record.name = spans[0].innerHTML;
-      }
-    }
-  }
-
-  function createQualityModal() {
-    const modal = $el('div')
-    modal.className = 'bad-internet-connection'
-    modal.innerHTML = `
-    <span class="bad-internet-text">Your internet isn't good, so other people can't hear you well!</span>
-    <button class="close-bad-internet-modal">Close</button>
-    `
-    modal.style.display = 'none'
-    document.body.appendChild(modal)
-  }
-  createQualityModal()
-
-  // ==================================================================
-  // DOM UPDATES
-  // ==================================================================
-  function talking(record) {
-    record.talking = true;
-    if (record && record.row && record.row.classList) {
-      record.row.classList.add("talking");
-    }
-  }
-  function notTalking(record) {
-    record.talking = false;
-    if (record && record.row && record.row.classList) {
-      record.row.classList.remove("talking");
-    }
-  }
-  function updateParticipant(record) {
-    if (!record) { return; }
-    if (!record.row) {
-      record.row = createParticipantRow(record);
-      dom_table.appendChild(record.row);
-    }
-    if (record && record.update_required && record.total >= config.min_talk_time_to_show) {
-      record.time_display.textContent = getFormattedTotalTime(record);
-    }
-    record.pct_display.textContent = getFormattedTotalPercent(record);
-    record.update_required = false;
-  }
-  function updateGroupTotals() {
-    let group, p, any_active = false;
-    for (group in groups) {
-      let record = groups[group];
-      let active = false;
-      record.total = 0;
-      record.count = 0;
-      for (p in record.participants) {
-        if (!record.participants.hasOwnProperty(p)) { continue; }
-        if (record.participants[p]) {
-          // User is in group
-          active = true;
-          record.total += data[p].total;
-          record.count++;
-        }
-      }
-      if (active) {
-        any_active = true;
-        document.querySelector(`#talk-time-group-total-${group}`).textContent = getFormattedTotalTime(record);
-        document.querySelector(`#talk-time-group-pct-${group}`).textContent = getFormattedTotalPercent(record);
-        document.querySelector(`#talk-time-group-avg-${group}`).textContent = formatTime(record.total / 1000 / record.count);
-      }
-      document.querySelector(`#talk-time-group-row-${group}`).style.display = active ? "table-row" : "none";
-    }
-    document.querySelector('#talk-time-group-table').style.display = any_active ? "block" : "none";
-  }
-
-  // Update the display on a regular interval
-  function render(force) {
-    try {
-      if (!force && !update_display_required) {
-        return;
-      }
-      dom_total.textContent = formatTime(totaltalktime / 1000);
-      let id;
-      for (id in data) {
-        if (!data.hasOwnProperty(id)) { continue; }
-        let record = data[id];
-        updateParticipant(record);
-      }
-      // Put them in talk order
-      let ids = Object.keys(data);
-      ids.sort(function (a, b) {
-        if (data[a].total < data[b].total) { return 1; }
-        if (data[a].total > data[b].total) { return -1; }
-        return 0;
-      });
-      let needs_reordering = false;
-      ids.forEach((id, i) => {
-        let record = data[id];
-        if (needs_reordering || !record.order || record.order !== i) {
-          needs_reordering = true;
-          if (record.row && record.row.parentNode) {
-            record.row.parentNode.appendChild(record.row);
+            }
           }
-          record.order = i;
         }
       });
-      // Update the groups
-      updateGroupTotals();
 
-      update_display_required = false;
-    } catch (e) {
-      console.log(e);
-    }
-  }
-  setInterval(render, 1000);
+      optionsObserver.observe(document.body, { attributes: false, childList: true, characterData: false, subtree: true });
 
-  // ==================================================================
-  // SPEECH PROCESSING AND TIMING
-  // ==================================================================
-  // Incremental function to run every X ms to keep track of who is talking
-  let last_pulse = 0;
-  function pulse() {
-    let id, record, now = Date.now();
-    let time_since_last_pulse = now - last_pulse;
-    if (!last_pulse) {
-      last_pulse = now;
-      return;
-    }
-    last_pulse = now;
-    try {
-      // We need to loop over every participant who has ever talked
-      for (id in data) {
-        if (!data.hasOwnProperty(id)) { continue; }
-        record = data[id];
-        if (record.talking) {
-          record.update_required = true;
-
-          // If it's been more than 1s since they have talked, they are done
-          if (now - record.last >= 1000) {
-            record.talking = false;
-            record.last_start = 0;
-            // Mark them as not talking
-            notTalking(record);
-            continue;
-          }
-          let duration = (record.last - record.last_start);
-
-          // If the person has been talking but not yet for at least one pulse_timeslice, don't do anything yet
-          if (duration < config.pulse_timeslice) {
-            continue;
-          }
-
-          // Update this person's time and total time with pulse timer duration
-          record.total += time_since_last_pulse;
-          totaltalktime += time_since_last_pulse;
-
-          // Mark them as talking
-          talking(record);
-
-          // Flag the display as requiring an update
-          update_display_required = true;
-        }
-      }
-    } catch (e) {
-      console.log(e);
-    }
-  }
-
-  setInterval(pulse, config.pulse_timeslice);
-  setInterval(() => {
-    chrome.storage.local.get(["current_name"], function (storage) {
-      let talkTimeContainer = document.querySelector('#talk-time-container')
-      if (talkTimeContainer) {
-        let percentages = document.querySelectorAll('.talk-time-table > tr')
-        let percentObject = []
-        percentages.forEach(percentage => {
-          let name = percentage.querySelector('.talk-time-name').textContent
-          let percent = percentage.querySelector('.talk-time-pct').textContent
-          percentObject.push({
-            name,
-            percent
-          })
-        })
-        fetch(`${LINK}percentage/${parsed_URL}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            percents: percentObject
-          })
-        })
-      }
-    })
-  }, 5000)
-
-  let apiInterval = setInterval(() => {
-    chrome.storage.local.get(["current_name"], async function (storage) {
-      await fetch(`${LINK}messages`)
-        .then((response) => response.json())
-        .then(async data => {
-          let isMessagePresent = data.find(d => d.to === storage.current_name && d.url === parsed_URL)
-          if (isMessagePresent) {
-            chrome.storage.local.set({ message: isMessagePresent })
-            let messageAlert = document.querySelector('.message-alert')
-            if (messageAlert) {
-              document.querySelector('.message-alert span').innerHTML = isMessagePresent.text;
-              messageAlert.style.display = 'flex'
+      const usersInterval = setInterval(() => {
+        const listOfUsers = document.querySelector('.GvcuGe')
+        if (listOfUsers) {
+          Array.from(listOfUsers.children).forEach(user => {
+            const username = user.querySelector('.zWGUib')
+            if (username?.nextElementSibling?.textContent === '(You)') {
+              chrome.storage.local.set({ "current_name": username.textContent.trim() })
             }
-            else {
-              displayTalkToMuchMessage(isMessagePresent.text, isMessagePresent.from)
-            }
-          }
-        })
-    })
-  }, 5000)
+          })
+          clearInterval(usersInterval)
 
-  setInterval(() => {
-    let allNames = document.querySelectorAll('.zWGUib');
-    let allImgUrls = document.querySelectorAll('.KjWwNd');
-    let users = [];
-    chrome.storage.local.get(["current_name"], async function (storage) {
-      for (let i = 0; i < allNames.length; i++) {
-        users.push({
-          name: allNames[i].textContent,
-          url: parsed_URL,
-          img: allImgUrls[i].getAttribute('src')
-        })
-      }
-      fetch(`${LINK}users/create/${parsed_URL}`, {
-        method: 'POST',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-          'Token': 'Bearer 580792'
-        },
-        body: JSON.stringify({
-          users
-        })
-      })
-    })
-  }, 5000)
-
-  let qualityInterval = setInterval(() => {
-    if (window.navigator.connection.downlink < 1.2 && window.navigator.connection.downlink > 0) {
-      document.querySelector('.bad-internet-connection').style.display = 'flex'
-      clearInterval(qualityInterval)
-    }
-  }, 5000)
-
-  // ==================================================================
-  // SPEECH DETECTION
-  // ==================================================================
-  // Watch for the talk icon to animate
-  let observer = new MutationObserver(function (mutations) {
-    try {
-      let allPercents = document.querySelectorAll(".unique_pct_selector");
-      let usersTalkingInformation = []
-      allPercents.forEach(percent => {
-        usersTalkingInformation.push({
-          percents: convertPercentToNumber(percent.textContent),
-          name: percent.previousElementSibling.previousElementSibling.textContent,
-          button: percent.closest('tr').querySelector('button')
-        })
-      })
-
-      let cancelButton = document.querySelector('.modal-cancel')
-      let sendButton = document.querySelector('.modal-send')
-      if (cancelButton && sendButton) {
-        cancelButton.onclick = function () {
-          document.querySelector('.modal').className = 'hidden modal'
-        }
-        sendButton.onclick = async function () {
-          if (!document.querySelector('.modal-message').value.trim()) {
-            document.querySelector('.modal-message').style.border = '1px solid tomato'
-          }
-          else {
-            chrome.storage.local.get(["current_name"], async function (storageFirst) {
-              chrome.storage.local.get(["to_name"], async function (storageSecond) {
-                await fetch(`${LINK}messages`, {
-                  method: 'POST',
-                  headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                  },
-                  body: JSON.stringify({
-                    text: document.querySelector('.modal-message').value.toString(),
-                    from: storageFirst.current_name,
-                    to: storageSecond.to_name,
-                    url: parsed_URL
-                  })
-                })
+          const meetingName = document.querySelector('.u6vdEc').textContent
+          if (meetingName !== 'Ready to join?' && meetingName.trim() !== '' && meetingName !== 'Meeting details') {
+            fetch(`${LINK}main/addmeeting`, {
+              method: "POST",
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                name: meetingName,
+                url: parsed_URL,
+                date: DATE
               })
+            })
+          }
+
+          let usersListObserver = new MutationObserver(function (mutations) {
+            mutations.forEach(function (mutation) {
+              if (mutation.addedNodes.length) {
+                addUser(mutation.addedNodes)
+              }
             });
-            document.querySelector('.modal').className = 'hidden modal'
+          });
+
+          let config = { attributes: true, childList: true, characterData: true }
+          usersListObserver.observe(listOfUsers, config);
+          addUser(listOfUsers.children)
+        }
+      }, 2500)
+
+      let meetingNameInterval = setInterval(() => {
+        const indicator = document.querySelector('.talk-time-user-wrapper')
+        if (indicator) {
+          let meetingName = document.querySelector('.ouH3xe')
+          let dashboardLink = document.createElement('div')
+          dashboardLink.className = 'dashboard-link-wrapper'
+          dashboardLink.innerHTML = `
+            <img class="dashboard-link-image" data-linkactive="" src="https://cdn-icons-png.flaticon.com/128/4050/4050374.png"/>
+            <a class="dashboard-link" href="https://nobeltt.com/dashboard/${parsed_URL}/${DATE}?q=${meetingName.textContent}">Visit dashboard</a>
+          `
+          document.body.appendChild(dashboardLink)
+
+          let topicWrapper = document.createElement('div')
+          topicWrapper.className = 'curr-topic-wrapper'
+          topicWrapper.innerHTML = `
+            <img class="curr-topic-image" data-topicactive="" src="https://cdn-icons-png.flaticon.com/128/4886/4886806.png"/>
+            <span class="curr-topic">No topic yet</span>
+          `
+          document.body.appendChild(topicWrapper)
+          clearInterval(meetingNameInterval)
+        }
+      }, 2000)
+
+      function $el(tag, props) {
+        let p, el = document.createElement(tag);
+        if (props) {
+          for (p in props) {
+            el[p] = props[p];
           }
         }
+        return el;
       }
 
-      let openBadgeModalButtons = document.querySelectorAll('.give-badge-button')
-      let badgeModal = document.querySelector('.badge-modal-wrapper')
-      let closeBadgeModal = document.querySelector('.close-badge-modal')
-      openBadgeModalButtons.forEach(button => {
-        button.onclick = function () {
-          badgeModal.style.display = 'flex'
-          let attr = this.parentElement.getAttribute('data-name')
-          chrome.storage.local.set({ "badge_name": attr })
-        }
-      })
 
-      if (closeBadgeModal) {
-        closeBadgeModal.onclick = function () {
-          badgeModal.style.display = 'none'
+      function closeBadgesModal() {
+        modalShadow.style.display = 'none'
+        badgeModalWrapper.style.display = 'none'
+        badgeSearchInput.value = ''
+        badges.forEach(badge => {
+          badge.style.display = 'flex'
+        })
+      }
+
+      function openBadgesModal(e) {
+        modalShadow.style.display = 'flex'
+        badgeModalWrapper.style.display = 'flex'
+        let attr = e.target.parentElement.getAttribute('data-name')
+        chrome.storage.local.set({ "badge_name": attr })
+      }
+
+      function closeMessageModal() {
+        messageAlert.style.display = 'none'
+        modalShadow.style.display = 'none'
+      }
+
+      function sendMessage() {
+        const messageValue = messageInput.value;
+        if (messageValue.trim()) {
+          modalShadow.style.display = 'none'
+          chrome.storage.local.get(["current_name"], function (storageFirst) {
+            chrome.storage.local.get(["to_name"], async function (storageSecond) {
+              fetch('https://adventurous-glorious-actor.glitch.me/send-messages', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: storageFirst.current_name, url: parsed_URL, message: messageValue, to: storageSecond.to_name, type: "CHAT" })
+              })
+            })
+            messageInput.value = ''
+          });
+          sendMessageModal.style.display = 'none'
         }
       }
 
-      let badgesButtons = document.querySelectorAll('.badge-modal > div');
-      badgesButtons.forEach(div => {
-        div.onclick = function () {
+      function closeSendMessageModal() {
+        modalShadow.style.display = 'none'
+        sendMessageModal.style.display = 'none'
+        messageInput.value = ''
+      }
+
+      function giveBadge(e) {
+        modalShadow.style.display = 'none'
+        chrome.storage.local.get(['current_name'], async function (storageFirst) {
           chrome.storage.local.get(["badge_name"], async function (storage) {
-            let img = div.querySelector('img')
-            let src = img.src.split('/').at(-1)
-            console.log(src)
-            fetch(`${LINK}badges/givebadge/${parsed_URL}/${storage.badge_name}`, {
+            let src = e.target.parentElement.dataset.badge
+            let badgeName = e.target.previousElementSibling.querySelector('span').textContent
+
+            fetch(`${LINK}badges/givebadge/${parsed_URL}/${storage.badge_name}/${DATE}`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json'
               },
               body: JSON.stringify({
-                badge: {badge: src}
+                badge: src,
               })
             })
-            badgeModal.style.display = 'none'
+              .then(() => {
+                fetch('https://adventurous-glorious-actor.glitch.me/send-messages', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ title: 'New badge!', url: parsed_URL, date: DATE, message: `You received ${badgeName} badge from ${storageFirst.current_name}!`, to: storage.badge_name, type: "BADGE" })
+                })
+              })
+            badgeModalWrapper.style.display = 'none'
+          })
+        })
+      }
+
+      function closeBadInternetModal() {
+        body.removeChild(badInternetModal)
+      }
+
+      function openSendMessageModal(e) {
+        modalShadow.style.display = 'flex'
+        const name = e.target.parentElement.dataset.name
+        chrome.storage.local.set({ "to_name": name })
+        document.querySelector('.modal-message').placeholder = `Send message to ${name}?`
+        sendMessageModal.style.display = 'flex'
+      }
+
+      function createNote() {
+        modalShadow.style.display = 'none'
+        let note = document.querySelector('.note')
+        let tagElements = document.querySelectorAll('.tag')
+        if (note.value) {
+          fetch(`${LINK}newconclusion/${parsed_URL}/${DATE}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              text: note.value,
+              url: parsed_URL,
+              tags: tagsAdded
+            })
+          })
+            .then(() => {
+              notesModal.style.display = 'none'
+              tagElements.forEach(tagElement => {
+                tags.removeChild(tagElement)
+              })
+              noTagsSpan.style.display = 'flex'
+            })
+        }
+
+      }
+
+      function addTag() {
+        let tagsInput = document.querySelector('.tags-input')
+        const tagValue = tagsInput.value
+        if (tagValue.trim()) {
+          tags.style.height = 'fit-content'
+          let tag = document.createElement('div')
+          tag.className = 'tag'
+          tag.innerHTML = `× ${tagValue}`
+          tags.appendChild(tag)
+          noTagsSpan.style.display = 'none'
+          tagsAdded.push(tagValue)
+          tagsInput.value = ''
+        }
+      }
+
+      function deleteTag(e) {
+        tags.removeChild(e.target)
+        if (tags.children.length === 1) {
+          noTagsSpan.style.display = 'flex'
+        }
+        tagsAdded = tagsAdded.filter(tag => tag != e.target.textContent.slice(2))
+      }
+
+      function closeNoteModal() {
+        modalShadow.style.display = 'none'
+        let tagsInput = document.querySelector('.tags-input')
+        let noteInput = document.querySelector('.note')
+        notesModal.style.display = 'none'
+        tagsInput.value = ''
+        noteInput.value = ''
+
+      }
+
+      function closeTopicModal() {
+        modalShadow.style.display = 'none'
+        topicModal.style.display = 'none'
+        topicInput.value = ''
+      }
+
+      async function setNewTopic() {
+        const topicValue = topicInput.value;
+        fetch('https://adventurous-glorious-actor.glitch.me/send-messages', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: parsed_URL, date: DATE, message: `Current topic of the meeting: ${topicValue}`, to: 'everyone', type: "TOPIC" })
+        })
+
+        modalShadow.style.display = 'none'
+        topicModal.style.display = 'none'
+        topicInput.value = ''
+      }
+
+      function visualOptions(e, selector, topValue) {
+        const wrapper = document.querySelector(selector);
+        const button = e.target;
+        const attr = button.dataset.active;
+        button.dataset.active = attr ? '' : 'true';
+        button.style.transform = attr ? `rotate(360deg)` : `rotate(-360deg)`;
+        wrapper.style.top = attr ? `-${topValue}px` : '0';
+      }
+
+      body.onclick = function (e) {
+        const options = {
+          'send-badge': giveBadge,
+          'close-message-alert': closeMessageModal,
+          'give-badge-button': openBadgesModal,
+          'close-badge-modal': closeBadgesModal,
+          'modal-send': sendMessage,
+          'close-message-modal': closeSendMessageModal,
+          'close-bad-internet-modal': closeBadInternetModal,
+          'send-message-button': openSendMessageModal,
+          'cancel-note': closeNoteModal,
+          'add-note': createNote,
+          'add-tag': addTag,
+          'tag': deleteTag,
+          'close-topic-modal': closeTopicModal,
+          'set-topic': setNewTopic,
+          'dashboard-link-image': () => {visualOptions(e, '.dashboard-link', 90)},
+          'curr-topic-image': () => {visualOptions(e, '.curr-topic', 50)}
+        }
+        options?.[e.target.className]?.(e)
+      }
+
+      body.oninput = function (e) {
+        if (e.target.className === 'badge-search') {
+          let value = e.target.value.toLowerCase()
+          badges.forEach(badge => {
+            let badgeName = badge.querySelector('.span-wrapper > span')
+            if (!badgeName.textContent.toLowerCase().includes(value) && value) {
+              badge.style.display = 'none'
+            }
+            else {
+              badge.style.display = 'flex'
+            }
           })
         }
-      })
+      }
 
-      const allTr = document.querySelectorAll('tr[data-name]')
-      if (allTr) {
-        const nameList = {};
+      // Default config
+      // These values may be overridden by values retrieved from server
+      let config = {
+        participants_selector: 'div[role="list"][aria-label="Participants"]',
+        pulse_timeslice: 500,
+        min_talk_time_to_show: 2000
+      };
+      let options = {};
+      let data = {};
+      let participants_list = null;
+      let totaltalktime = 0;
+      let groups = {
+        "a": { "participants": {} },
+        "b": { "participants": {} },
+        "c": { "participants": {} },
+        "d": { "participants": {} }
+      };
+      let update_display_required = false;
 
-        allTr.forEach((item) => {
-          const currentName = item.getAttribute("data-name");
+      let dom_container = null;
+      let dom_table = null;
+      let dom_total = null;
 
-          if (nameList[currentName] || !item.children[0].textContent.trim()) {
-            item.remove();
+      // ==================================================================
+      // UTIL
+      // ==================================================================
+
+      // UTIL: DOM
+      // ---------
+      function parent(el, selector) {
+        if (el.matches && el.matches(selector)) { return el; }
+        if (el.parentNode) { return parent(el.parentNode, selector); }
+        return null;
+      }
+
+      // UTIL: TIME FORMATTING
+      // ---------------------
+      function formatTime(t) {
+        try {
+          if (!t) {
+            return "";
           }
-          else {
-            nameList[currentName] = true;
+          let m = Math.floor(t / 60);
+          let s = Math.floor(t - (m * 60));
+          return m + " : " + (("" + s).replace(/^(\d)$/, "0$1"));
+        } catch (e) {
+          console.log(e);
+          return "";
+        }
+      }
+      function getFormattedTotalTime(record) {
+        if (!record || !record.total) { return ""; }
+        return formatTime(record.total / 1000);
+      }
+      function getFormattedTotalPercent(record) {
+        if (!record || !record.total || !totaltalktime) { return ""; }
+        let pctstr = "";
+        if (record.total && totaltalktime) {
+          let pct = (record.total / totaltalktime) * 100;
+          if (pct > 100) { pct = 100; } // somehow?
+          pctstr = pct.toFixed(0) + "%";
+        }
+        return pctstr;
+      }
+
+      // ==================================================================
+      // DOM CREATION
+      // ==================================================================
+
+      // The container for the UI
+      function createContainer() {
+        dom_container = $el('div', { id: "talk-time-container" });
+        dom_container.innerHTML = `
+        <div class="talk-time-top" title="Click to collapse/expand">
+          <img class="talk-time-logo" style=" filter: grayscale(1) invert(1);" src="https://cdn-icons-png.flaticon.com/24/1827/1827379.png" />
+        </div>
+        <div class="talk-time-header">
+          <div class="talk-time-show-groups">Show Groups</div>
+          <div class="talk-time-hide-groups">Hide Groups</div>
+          <div class="talk-time-summary">Total Talk Time: <span id="talk-time-summary-total"></span></div>
+        </div>
+        <div class="talk-time-body">
+          <table class="talk-time-table"><tbody></tbody></table>
+          ${createGroupTable()}
+        </div>
+      `;
+        document.body.appendChild(dom_container);
+        dom_table = dom_container.querySelector('table');
+        dom_total = dom_container.querySelector('#talk-time-summary-total');
+        let onclick = function (selector, f) {
+          dom_container.querySelector(selector).addEventListener('click', f);
+        };
+        onclick('.talk-time-top', () => { dom_container.classList.toggle("collapsed"); });
+        onclick('.talk-time-show-groups', () => { dom_container.classList.add('show_groups'); });
+        onclick('.talk-time-hide-groups', () => { dom_container.classList.remove('show_groups'); });
+      }
+
+      // Create the group rendering table
+      function createGroupTable() {
+        let table = `<table id="talk-time-group-table" class="talk-time-table talk-time-group-table"><tbody>`;
+        ['a', 'b', 'c', 'd'].forEach(group => {
+          table += `
+        <tr id="talk-time-group-row-${group}" class="talk-time-group-row">
+          <td><div contenteditable="true" title="Click to edit label" class="talk-time-group-label talk-time-group-selector-${group}">${group.toUpperCase()}</div></td>
+          <td id="talk-time-group-total-${group}" class="talk-time-group-total talk-time-time"></td>
+          <td id="talk-time-group-pct-${group}" class="talk-time-group-pct talk-time-pct"></td>
+          <td>Avg/person: </td>
+          <td id="talk-time-group-avg-${group}" class="talk-time-group-avg talk-time-avg"></td>
+        </tr>`;
+        });
+        table += `</tbody></table>`;
+        return table;
+      }
+
+      // A participant's row
+      function createParticipantRow(record) {
+        if (!record) { return; }
+        let row = $el('tr');
+        row.setAttribute('data-name', record.name)
+        row.className = 'talk-time-user-wrapper'
+        row.innerHTML = `
+            <td class="talk-time-name">${record.name}</td>
+            <td class="talk-time-time">0:00</td>
+            <td class="talk-time-pct unique_pct_selector">0%</td>
+            <button class="send-message-button">Send Message</button>
+            <button class="give-badge-button">Give Badge</button>
+            <td class="talk-time-groups">${createParticipantRowGroups(record)}</td>
+          `;
+        record.row = row;
+        record.time_display = row.querySelector('.talk-time-time');
+        record.pct_display = row.querySelector('.talk-time-pct');
+        // Attach click listeners to the groups
+        row.querySelectorAll('.talk-time-group-selector-container > *').forEach(el => {
+          el.addEventListener('click', () => {
+            let group = el.dataset.group;
+            let selected = !el.classList.contains('selected');
+            el.classList.toggle('selected', selected);
+            groups[group].participants[record.id] = selected;
+            // Force an immediate re-rendering of groups summary because data may have changed
+            updateGroupTotals();
+          })
+        });
+        return row;
+      }
+
+      // Create the group selectors that go into each participant's row
+      function createParticipantRowGroups() {
+        return `
+        <div class="talk-time-group-selector-container" title="Click groups to add this participant's time to a group bucket">
+          <div class="talk-time-group-selector talk-time-group-selector-a" data-group="a">A</div>
+          <div class="talk-time-group-selector talk-time-group-selector-b" data-group="b">B</div>
+          <div class="talk-time-group-selector talk-time-group-selector-c" data-group="c">C</div>
+          <div class="talk-time-group-selector talk-time-group-selector-d" data-group="d">D</div>
+        </div>
+        `;
+      }
+
+      // ==================================================================
+      // DATA PROCESSING
+      // ==================================================================
+
+      // Init a participant the first time we hear from them
+      // ---------------------------------------------------
+      function init_participant(id) {
+        let record = {
+          "id": id,
+          "total": 0,
+          "last_start": 0,
+          "last": 0,
+          "name": "",
+          "time_display": null,
+          "pct_display": null,
+          "update_required": false,
+          "groups": {},
+          "visible": false
+        };
+        getParticipantName(record);
+        return record;
+      }
+
+      // Retrieve a participant's name from the DOM
+      // ------------------------------------------
+      function getParticipantName(record) {
+        if (!record || !record.id || record.name) { return; }
+        const listitem = document.querySelector(`div[role="listitem"][data-participant-id="${record.id}"]`);
+        if (listitem) {
+          // The first span in the container has the name
+          const spans = listitem.querySelectorAll('span');
+          if (spans && spans.length) {
+            record.name = spans[0].innerHTML;
+          }
+        }
+      }
+
+
+      // ==================================================================
+      // DOM UPDATES
+      // ==================================================================
+      function talking(record) {
+        record.talking = true;
+        if (record && record.row && record.row.classList) {
+          record.row.classList.add("talking");
+        }
+      }
+      function notTalking(record) {
+        record.talking = false;
+        if (record && record.row && record.row.classList) {
+          record.row.classList.remove("talking");
+        }
+      }
+      function updateParticipant(record) {
+        if (!record) { return; }
+        if (!record.row) {
+          record.row = createParticipantRow(record);
+          dom_table.appendChild(record.row);
+        }
+        if (record && record.update_required && record.total >= config.min_talk_time_to_show) {
+          record.time_display.textContent = getFormattedTotalTime(record);
+        }
+        record.pct_display.textContent = getFormattedTotalPercent(record);
+        record.update_required = false;
+      }
+      function updateGroupTotals() {
+        let group, p, any_active = false;
+        for (group in groups) {
+          let record = groups[group];
+          let active = false;
+          record.total = 0;
+          record.count = 0;
+          for (p in record.participants) {
+            if (!record.participants.hasOwnProperty(p)) { continue; }
+            if (record.participants[p]) {
+              // User is in group
+              active = true;
+              record.total += data[p].total;
+              record.count++;
+            }
+          }
+          if (active) {
+            any_active = true;
+            document.querySelector(`#talk-time-group-total-${group}`).textContent = getFormattedTotalTime(record);
+            document.querySelector(`#talk-time-group-pct-${group}`).textContent = getFormattedTotalPercent(record);
+            document.querySelector(`#talk-time-group-avg-${group}`).textContent = formatTime(record.total / 1000 / record.count);
+          }
+          document.querySelector(`#talk-time-group-row-${group}`).style.display = active ? "table-row" : "none";
+        }
+        document.querySelector('#talk-time-group-table').style.display = any_active ? "block" : "none";
+      }
+
+      // Update the display on a regular interval
+      function render(force) {
+        try {
+          if (!force && !update_display_required) {
+            return;
+          }
+          dom_total.textContent = formatTime(totaltalktime / 1000);
+          let id;
+          for (id in data) {
+            if (!data.hasOwnProperty(id)) { continue; }
+            let record = data[id];
+            updateParticipant(record);
+          }
+          // Put them in talk order
+          let ids = Object.keys(data);
+          ids.sort(function (a, b) {
+            if (data[a].total < data[b].total) { return 1; }
+            if (data[a].total > data[b].total) { return -1; }
+            return 0;
+          });
+          let needs_reordering = false;
+          ids.forEach((id, i) => {
+            let record = data[id];
+            if (needs_reordering || !record.order || record.order !== i) {
+              needs_reordering = true;
+              if (record.row && record.row.parentNode) {
+                record.row.parentNode.appendChild(record.row);
+              }
+              record.order = i;
+            }
+          });
+          // Update the groups
+          updateGroupTotals();
+
+          update_display_required = false;
+        } catch (e) {
+          console.log(e);
+        }
+      }
+      setInterval(render, 1000);
+
+      // ==================================================================
+      // SPEECH PROCESSING AND TIMING
+      // ==================================================================
+      // Incremental function to run every X ms to keep track of who is talking
+      let last_pulse = 0;
+      function pulse() {
+        let id, record, now = Date.now();
+        let time_since_last_pulse = now - last_pulse;
+        if (!last_pulse) {
+          last_pulse = now;
+          return;
+        }
+        last_pulse = now;
+        try {
+          // We need to loop over every participant who has ever talked
+          for (id in data) {
+            if (!data.hasOwnProperty(id)) { continue; }
+            record = data[id];
+            if (record.talking) {
+              record.update_required = true;
+
+              // If it's been more than 1s since they have talked, they are done
+              if (now - record.last >= 1000) {
+                record.talking = false;
+                record.last_start = 0;
+                // Mark them as not talking
+                notTalking(record);
+                continue;
+              }
+              let duration = (record.last - record.last_start);
+
+              // If the person has been talking but not yet for at least one pulse_timeslice, don't do anything yet
+              if (duration < config.pulse_timeslice) {
+                continue;
+              }
+
+              // Update this person's time and total time with pulse timer duration
+              record.total += time_since_last_pulse;
+              totaltalktime += time_since_last_pulse;
+
+              // Mark them as talking
+              talking(record);
+
+              // Flag the display as requiring an update
+              update_display_required = true;
+            }
+          }
+        } catch (e) {
+          console.log(e);
+        }
+      }
+
+      setInterval(pulse, config.pulse_timeslice);
+      setInterval(() => {
+        let talkTimeContainer = document.querySelector('#talk-time-container')
+        if (talkTimeContainer) {
+          let percentages = document.querySelectorAll('.talk-time-table > tr')
+          let percentObject = []
+          percentages.forEach(percentage => {
+            let name = percentage.querySelector('.talk-time-name').textContent
+            let percent = percentage.querySelector('.talk-time-pct').textContent
+            percentObject.push({
+              name,
+              percent
+            })
+          })
+          fetch(`${LINK}percentage/${parsed_URL}/${DATE}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              percents: percentObject
+            })
+          })
+        }
+      }, 10000)
+
+      // ==================================================================
+      // SPEECH DETECTION
+      // ==================================================================
+      // Watch for the talk icon to animate
+      let observer = new MutationObserver(function (mutations) {
+
+        if (window.navigator.connection.downlink < 1.2 && window.navigator.connection.downlink > 0) {
+          let badInternetConn = document.querySelector('.bad-internet-connection')
+          if (badInternetConn) {
+
+            document.querySelector('.bad-internet-connection').style.display = 'flex'
+          }
+        }
+
+        try {
+          const allTr = document.querySelectorAll('.talk-time-table > tr')
+          if (allTr) {
+            const nameList = {};
+
+            allTr.forEach((item) => {
+              const currentName = item.getAttribute("data-name");
+
+              if (nameList[currentName] || !item.children[0].textContent.trim()) {
+                item.remove();
+              }
+              else {
+                nameList[currentName] = true;
+              }
+
+            });
           }
 
+          chrome.storage.local.get(['current_name'], function (storage) {
+            let allTr = document.querySelectorAll('.talk-time-table > tr')
+            allTr.forEach(tr => {
+              if (tr.dataset.name === storage.current_name) {
+                tr.querySelector('.send-message-button').disabled = true
+                tr.querySelector('.give-badge-button').disabled = true
+              }
+            })
+          })
+
+          mutations.forEach(function (mutation) {
+            let el = mutation.target;
+
+            // Only act if there really was a change
+            // I don't think I should have to do this, but here we are
+            if (mutation.oldValue === el.className) { return; }
+
+            // The element must be visible for it to count. When muted, the talk bars become hidden
+            let display = getComputedStyle(el).getPropertyValue('display');
+            if ("none" === display) {
+              return;
+            }
+
+            // Make sure the participant has a data record and it's being tracked
+            let id = el.getAttribute('talk-id');
+            if (!id) {
+              let listitem = parent(el, 'div[role="listitem"]');
+              if (listitem) {
+                id = listitem.getAttribute('data-participant-id');
+                el.setAttribute('talk-id', id);
+              }
+            }
+
+            // This is the first time this person has talked, add a timer for them
+            let record = data[id];
+            if (!record) {
+              record = data[id] = init_participant(id, el);
+            }
+
+            const now = Date.now();
+            if (!record.last_start) {
+              record.last_start = now;
+            }
+            if (record.last < now) {
+              record.last = now;
+            }
+            record.talking = true;
+
+
+          });
+        } catch (e) {
+          console.log(e);
+        }
+      });
+
+
+      // ==================================================================
+      // ATTACH
+      // ==================================================================
+      let observerConfig = {
+        attributes: true,
+        attributeOldValue: true,
+        attributeFilter: ['class'],
+        subtree: true,
+      };
+      let attached = false;
+      function attach() {
+        if (attached) {
+          if (!participants_list || !participants_list.parentNode) {
+            dom_container.style.display = "none";
+            observer.disconnect();
+            attached = false;
+          }
+        }
+        else {
+          participants_list = document.querySelector(config.participants_selector);
+          if (participants_list) {
+            observer.observe(participants_list, observerConfig);
+            if (dom_container) {
+              dom_container.style.display = "block";
+            }
+            else {
+              createContainer();
+            }
+            attached = true;
+          }
+        }
+      }
+
+
+      // ==================================================================
+      // WELCOME MESSAGE
+      // ==================================================================
+      function welcome() {
+        let d = $el('div', { id: "talk-time-welcome" });
+        d.innerHTML = `
+      <h1 class="talk-time-welcome-title">Welcome to Talk Time!</h1>
+      <p>To enable the Talk Time display, turn on the Participants list while in a Meet.</p>
+      <div class="group-welcome-instructions">Click on the
+          <div class="talk-time-group-label welcome-groups-mark talk-time-group-selector-a">A</div>
+          <div class="talk-time-group-label welcome-groups-mark talk-time-group-selector-b">B</div>
+          <div class="talk-time-group-label welcome-groups-mark talk-time-group-selector-c">C</div>
+          <div class="talk-time-group-label welcome-groups-mark talk-time-group-selector-d">D</div>
+          grouping buttons to add participants to ad-hoc groups and total their time together. Click on the group labels
+          below to rename them.
+      </div>
+      <div class="site-link">For more, visit <a href="https://EveryoneShouldHaveAVoice.com" target="_blank">EveryoneShouldHaveAVoice.com</a>
+      </div>
+      <div class="warning-respect-text">Don't forget that everyone should have a voice and that every question should not go unanswered! Respect each other</div>
+      <div class="okay-wrapper">
+          <button id="talk-time-welcome-okay">Okay</button>
+      </div>
+      `;
+        document.body.appendChild(d);
+        document.querySelector('#talk-time-welcome-okay').addEventListener('click', () => {
+          options.welcome_dismissed = false;
+          chrome.storage.local.set({ "options": options });
+          d.style.display = "none";
         });
       }
 
-      const meetingGeneralName = document.querySelector('.u6vdEc')
-      if (!generalFlag) {
-        fetch(`${LINK}main/addgeneral`, {
-          method: "POST",
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            name: meetingGeneralName.textContent,
-            meetingObject: {
-              url: parsed_URL,
-              date: new Date().toLocaleString()
-            }
-          })
-        })
-        generalFlag = true;
-      }
-
-      const closeBadInternetModal = document.querySelector('.close-bad-internet-modal')
-      const badInternetModal = document.querySelector('.bad-internet-connection')
-      if (closeBadInternetModal) {
-        closeBadInternetModal.onclick = function () {
-          document.body.removeChild(badInternetModal)
+      // Get options
+      chrome.storage.local.get(['options'], function (storage) {
+        options = storage.options;
+        if (!options) {
+          options = {
+            "welcome_dismissed": false
+          };
+          chrome.storage.local.set({ "options": options });
         }
-      }
-
-      let allMeetingNames = document.querySelectorAll('.zWGUib');
-      allMeetingNames.forEach(meetingName => {
-        if (meetingName.nextElementSibling?.className === 'NnTWjc') {
-          chrome.storage.local.set({ "current_name": meetingName.textContent })
-        }
-      })
-
-
-      chrome.storage.local.get(["current_name"], async function (storage) {
-        let vadLink = `${LINK}audio/vad/${parsed_URL}/${storage.current_name}`
-        let vadElement = document.querySelector('.vad-link');
-        if (!vadElement) {
-          let a = $el('a')
-          a.className = 'vad-link'
-          a.setAttribute('clicked', false)
-          a.setAttribute('href', vadLink)
-          a.setAttribute('target', '_blank')
-          document.body.appendChild(a)
+        if (!options.welcome_dismissed) {
+          welcome()
         }
 
-        else {
-          if (vadElement.getAttribute('clicked') === 'false') {
-            vadElement.setAttribute('clicked', 'true')
-            vadElement.click()
-          }
-        }
-      })
-
-      let messageAlert = document.querySelector('.message-alert');
-      if (messageAlert) {
-        document.querySelector('.close-message-alert').onclick = function () {
-          chrome.storage.local.get(["current_name"], async function (storage) {
-            await fetch(`${LINK}messages`, {
-              method: 'DELETE',
-              headers: {
-                'Content-type': 'application/json'
-              },
-              body: JSON.stringify({
-                name: storage.current_name,
-                url: parsed_URL
-              })
-            })
-          })
-          messageAlert.style.display = 'none';
-        }
-      }
-
-      chrome.storage.local.get(['current_name'], function (storage) {
-        let allTr = document.querySelectorAll('.talk-time-table > tr')
-        for (let i = 0; i < allTr.length; i++) {
-          for (let j = 0; j < allTr[i].children.length; j++) {
-            let child = allTr[i].children[j]
-            if (child.className === 'talk-time-name') {
-              if (child.textContent === storage.current_name) {
-                // allTr[i].querySelector('.send-message-button').disabled = true;
-                // allTr[i].querySelector('.give-badge-button').disabled = true;
-              }
-            }
-          }
-        }
-      })
-
-      chrome.storage.local.get(['background'], function (storage) {
-        const { background } = storage;
-        const allSendMessageButtons = document.querySelectorAll('.send-message-button');
-        allSendMessageButtons.forEach(button => {
-          if (!button.disabled) {
-            button.style.background = background;
-            button.style.border = `1px solid ${background}`;
-          }
-        })
-      })
-
-      let names = [...usersTalkingInformation.map(user => user.name)];
-      let buttons = [...usersTalkingInformation.map(user => user.button)];
-
-      for (let i = 0; i < usersTalkingInformation.length; i++) {
-        buttons[i].onclick = function () {
-          chrome.storage.local.set({ "to_name": names[i] })
-          if (!document.querySelector('.modal')) {
-            createSendMessageModal(names[i])
-            document.querySelector('.modal').className = 'modal'
-            document.querySelector('.modal-message').placeholder = `Your message here`
-          }
-          else {
-            document.querySelector('.modal-title').innerHTML = `Do you want send message to the ${names[i]}?`
-            document.querySelector('.modal').className = 'modal'
-            document.querySelector('.modal-message').placeholder = `Your message here`
-          }
-        }
-
-      }
-
-      mutations.forEach(function (mutation) {
-        let el = mutation.target;
-
-        // Only act if there really was a change
-        // I don't think I should have to do this, but here we are
-        if (mutation.oldValue === el.className) { return; }
-
-        // The element must be visible for it to count. When muted, the talk bars become hidden
-        let display = getComputedStyle(el).getPropertyValue('display');
-        if ("none" === display) {
-          return;
-        }
-
-        // Make sure the participant has a data record and it's being tracked
-        let id = el.getAttribute('talk-id');
-        if (!id) {
-          let listitem = parent(el, 'div[role="listitem"]');
-          if (listitem) {
-            id = listitem.getAttribute('data-participant-id');
-            el.setAttribute('talk-id', id);
-          }
-        }
-
-        // This is the first time this person has talked, add a timer for them
-        let record = data[id];
-        if (!record) {
-          record = data[id] = init_participant(id, el);
-        }
-
-        const now = Date.now();
-        if (!record.last_start) {
-          record.last_start = now;
-        }
-        if (record.last < now) {
-          record.last = now;
-        }
-        record.talking = true;
-
-
+        setInterval(attach, 1000);
       });
-    } catch (e) {
-      console.log(e);
-    }
-  });
 
-
-  // ==================================================================
-  // ATTACH
-  // ==================================================================
-  let observerConfig = {
-    attributes: true,
-    attributeOldValue: true,
-    attributeFilter: ['class'],
-    subtree: true,
-  };
-  let attached = false;
-  function attach() {
-    if (attached) {
-      if (!participants_list || !participants_list.parentNode) {
-        dom_container.style.display = "none";
-        observer.disconnect();
-        attached = false;
-      }
-    }
-    else {
-      participants_list = document.querySelector(config.participants_selector);
-      if (participants_list) {
-        observer.observe(participants_list, observerConfig);
-        if (dom_container) {
-          dom_container.style.display = "block";
-        }
-        else {
-          createContainer();
-        }
-        attached = true;
-      }
-    }
-  }
-
-
-  // ==================================================================
-  // WELCOME MESSAGE
-  // ==================================================================
-  function welcome() {
-    let d = $el('div', { id: "talk-time-welcome" });
-    d.innerHTML = `
-  <h1 class="talk-time-welcome-title">Welcome to Talk Time!</h1>
-  <p>To enable the Talk Time display, turn on the Participants list while in a Meet.</p>
-  <div class="group-welcome-instructions">Click on the
-      <div class="talk-time-group-label welcome-groups-mark talk-time-group-selector-a">A</div>
-      <div class="talk-time-group-label welcome-groups-mark talk-time-group-selector-b">B</div>
-      <div class="talk-time-group-label welcome-groups-mark talk-time-group-selector-c">C</div>
-      <div class="talk-time-group-label welcome-groups-mark talk-time-group-selector-d">D</div>
-      grouping buttons to add participants to ad-hoc groups and total their time together. Click on the group labels
-      below to rename them.
-  </div>
-  <div class="site-link">For more, visit <a href="https://EveryoneShouldHaveAVoice.com" target="_blank">EveryoneShouldHaveAVoice.com</a>
-  </div>
-  <div class="warning-respect-text">Don't forget that everyone should have a voice and that every question should not go unanswered! Respect each other</div>
-  <div class="okay-wrapper">
-      <button id="talk-time-welcome-okay">Okay</button>
-  </div>
-  `;
-    document.body.appendChild(d);
-    document.querySelector('#talk-time-welcome-okay').addEventListener('click', () => {
-      options.welcome_dismissed = false;
-      chrome.storage.local.set({ "options": options });
-      d.style.display = "none";
-    });
-  }
-
-  // Get options
-  chrome.storage.local.get(['options'], function (storage) {
-    options = storage.options;
-    if (!options) {
-      options = {
-        "welcome_dismissed": false
-      };
-      chrome.storage.local.set({ "options": options });
-    }
-    if (!options.welcome_dismissed) {
-      welcome()
-    }
-
-    setInterval(attach, 1000);
-  });
-
-  let convertPercentToNumber = percent => +percent.slice(0, -1)
-
-  function displayTalkToMuchMessage(text, from) {
-    let message = $el('div');
-    message.className = 'message-alert';
-    message.innerHTML = `
-        <h1>A new message!</h1>
-        <span>${text}</span>
-        <span>from ${from}</span>
-        <button class="close-message-alert">Close</button>
-      `
-    message.style.display = 'flex'
-    document.body.appendChild(message)
-  }
+    })
 
 }
