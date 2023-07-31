@@ -1,222 +1,60 @@
-export function createBadgesModal(body) {
+function createBadgesModal(body) {
     let modal = document.createElement('div');
     modal.className = 'badge-modal-wrapper'
     modal.innerHTML = `
     <div class="badge-modal-header">
     <input type="text" placeholder="Search" class="badge-search" />
-    <button class="close-badge-modal">╳</button>
+    <button class="close-badges-modal">╳</button>
   </div>
   <div class="badge-modal">
-    <div class="badge-item" data-badge="active_listener3.png">
+    <div class="badge-item" data-badge="be_present">
         <div class="span-wrapper">
-            <img src="https://nobeltt.com/img/active_listener3.png" />
-            <span>Active Listener</span>
+            <img src="https://nobeltt.com/img/be_present.png" />
+            <span>Be Present</span>
         </div>
-        <button class="send-badge">send</button>
+        <button class="send-badge">Send</button>
     </div>
-    <div class="badge-item" data-badge="areas_of_agreement5.png">
+    <div class="badge-item" data-badge="bee_brief">
         <div class="span-wrapper">
-            <img src="https://nobeltt.com/img/areas_of_agreement5.png" />
-            <span>Areas Of Agreement</span>
-        </div>
-        <button class="send-badge">send</button>
-    </div>
-    <div class="badge-item" data-badge="ask_for_feedback3.png">
-        <div class="span-wrapper">
-            <img src="https://nobeltt.com/img/ask_for_feedback3.png" />
-            <span>Ask For Feedback</span>
-        </div>
-        <button class="send-badge">send</button>
-    </div>
-    <div class="badge-item" data-badge="bee_brief6.png">
-        <div class="span-wrapper">
-            <img src="https://nobeltt.com/img/bee_brief6.png" />
+            <img src="https://nobeltt.com/img/bee_brief.png" />
             <span>Bee Brief</span>
         </div>
-        <button class="send-badge">send</button>
+        <button class="send-badge">Send</button>
     </div>
-    <div class="badge-item" data-badge="brainstormer5.png">
+    <div class="badge-item" data-badge="fun">
         <div class="span-wrapper">
-            <img src="https://nobeltt.com/img/brainstormer5.png" />
-            <span>Brainstormer</span>
+            <img src="https://nobeltt.com/img/fun.png" />
+            <span>Fun</span>
         </div>
-        <button class="send-badge">send</button>
-  
+        <button class="send-badge">Send</button>
     </div>
-    <div class="badge-item" data-badge="check_for_understanding2.png">
+    <div class="badge-item" data-badge="encourage">
         <div class="span-wrapper">
-            <img src="https://nobeltt.com/img/check_for_understanding2.png" />
-            <span>Check For Understanding</span>
+            <img src="https://nobeltt.com/img/encourage.png" />
+            <span>Encourage</span>
         </div>
-        <button class="send-badge">send</button>
+        <button class="send-badge">Send</button>
     </div>
-    <div class="badge-item" data-badge="clarifing_question4.png">
+    <div class="badge-item" data-badge="on_time">
         <div class="span-wrapper">
-            <img src="https://nobeltt.com/img/clarifing_question4.png" />
-            <span>Clarifing Question</span>
+            <img src="https://nobeltt.com/img/on_time.png" />
+            <span>On Time</span>
         </div>
-        <button class="send-badge">send</button>
+        <button class="send-badge">Send</button>
     </div>
-    <div class="badge-item" data-badge="decide5.png">
+    <div class="badge-item" data-badge="help">
         <div class="span-wrapper">
-            <img src="https://nobeltt.com/img/decide5.png" />
-            <span>Decide</span>
+            <img src="https://nobeltt.com/img/help.png" />
+            <span>Help</span>
         </div>
-        <button class="send-badge">send</button>
+        <button class="send-badge">Send</button>
     </div>
-    <div class="badge-item" data-badge="define_the_problem7.png">
+    <div class="badge-item" data-badge="zen_enviroment">
         <div class="span-wrapper">
-            <img src="https://nobeltt.com/img/define_the_problem7.png" />
-            <span>Define The Problem</span>
-        </div>
-        <button class="send-badge">send</button>
-    </div>
-    <div class="badge-item" data-badge="disagreement_solver6.png">
-        <div class="span-wrapper">
-            <img src="https://nobeltt.com/img/disagreement_solver6.png" />
-            <span>Disagreement Solver</span>
-        </div>
-        <button class="send-badge">send</button>
-    </div>
-    <div class="badge-item" data-badge="encourageing_knowlege7.png">
-        <div class="span-wrapper">
-            <img src="https://nobeltt.com/img/encourageing_knowlege7.png" />
-            <span>Encourageing Knowlege</span>
-        </div>
-        <button class="send-badge">send</button>
-    </div>
-    <div class="badge-item" data-badge="give_feedback7.png">
-        <div class="span-wrapper">
-            <img src="https://nobeltt.com/img/give_feedback7.png" />
-            <span>Give Feedback</span>
-        </div>
-        <button class="send-badge">send</button>
-    </div>
-    <div class="badge-item" data-badge="helper5.png">
-        <div class="span-wrapper">
-            <img src="https://nobeltt.com/img/helper5.png" />
-            <span>Helper</span>
-        </div>
-        <button class="send-badge">send</button>
-    </div>
-    <div class="badge-item" data-badge="ideas_evaluation7.png">
-        <div class="span-wrapper">
-            <img src="https://nobeltt.com/img/ideas_evaluation7.png" />
-            <span>Ideas Evaluation</span>
-        </div>
-        <button class="send-badge">send</button>
-    </div>
-    <div class="badge-item" data-badge="info_shareer4.png">
-        <div class="span-wrapper">
-            <img src="https://nobeltt.com/img/info_shareer4.png" />
-            <span>Info Shareer</span>
-        </div>
-        <button class="send-badge">send</button>
-    </div>
-    <div class="badge-item" data-badge="mic_earned5.png">
-        <div class="span-wrapper">
-            <img src="https://nobeltt.com/img/mic_earned5.png" />
-            <span>Mic Earned</span>
-        </div>
-        <button class="send-badge">send</button>
-    </div>
-    <div class="badge-item" data-badge="muting_maestro2.png">
-        <div class="span-wrapper">
-            <img src="https://nobeltt.com/img/muting_maestro2.png" />
-            <span>Muting Maestro</span>
-        </div>
-        <button class="send-badge">send</button>
-    </div>
-    <div class="badge-item" data-badge="norms_meeting5.png">
-        <div class="span-wrapper">
-            <img src="https://nobeltt.com/img/norms_meeting5.png" />
-            <span>Norms Meeting</span>
-        </div>
-        <button class="send-badge">send</button>
-    </div>
-    <div class="badge-item" data-badge="notes_master6.png">
-        <div class="span-wrapper">
-            <img src="https://nobeltt.com/img/notes_master6.png" />
-            <span>Notes Master</span>
-        </div>
-        <button class="send-badge">send</button>
-    </div>
-    <div class="badge-item" data-badge="online_tools6.png">
-        <div class="span-wrapper">
-            <img src="https://nobeltt.com/img/online_tools6.png" />
-            <span>Online Tools</span>
-        </div>
-        <button class="send-badge">send</button>
-    </div>
-    <div class="badge-item" data-badge="problem_pauser5.png">
-        <div class="span-wrapper">
-            <img src="https://nobeltt.com/img/problem_pauser5.png" />
-            <span>Problem Pauser</span>
-        </div>
-        <button class="send-badge">send</button>
-    </div>
-    <div class="badge-item" data-badge="questions3.png">
-        <div class="span-wrapper">
-            <img src="https://nobeltt.com/img/questions3.png" />
-            <span>Questions</span>
-        </div>
-        <button class="send-badge">send</button>
-    </div>
-    <div class="badge-item" data-badge="ready_headset_go4.png">
-        <div class="span-wrapper">
-            <img src="https://nobeltt.com/img/ready_headset_go4.png" />
-            <span>Ready Headset Go</span>
-        </div>
-        <button class="send-badge">send</button>
-    </div>
-    <div class="badge-item" data-badge="resource_vs_impact6.png">
-        <div class="span-wrapper">
-            <img src="https://nobeltt.com/img/resource_vs_impact6.png" />
-            <span>Resource Vs Impact</span>
-        </div>
-        <button class="send-badge">send</button>
-    </div>
-    <div class="badge-item" data-badge="screenshare2.png">
-        <div class="span-wrapper">
-            <img src="https://nobeltt.com/img/screenshare2.png" />
-            <span>Screenshare</span>
-        </div>
-        <button class="send-badge">send</button>
-    </div>
-    <div class="badge-item" data-badge="stay_on_topic4.png">
-        <div class="span-wrapper">
-            <img src="https://nobeltt.com/img/stay_on_topic4.png" />
-            <span>Stay On Topic</span>
-        </div>
-        <button class="send-badge">send</button>
-    </div>
-    <div class="badge-item" data-badge="teacher8.png">
-        <div class="span-wrapper">
-            <img src="https://nobeltt.com/img/teacher8.png" />
-            <span>Teacher</span>
-        </div>
-        <button class="send-badge">send</button>
-    </div>
-    <div class="badge-item" data-badge="time_earning6.png">
-        <div class="span-wrapper">
-            <img src="https://nobeltt.com/img/time_earning6.png" />
-            <span>Time Earning</span>
-        </div>
-        <button class="send-badge">send</button>
-    </div>
-    <div class="badge-item" data-badge="to_do_tracker5.png">
-        <div class="span-wrapper">
-            <img src="https://nobeltt.com/img/to_do_tracker5.png" />
-            <span>To Do Tracker</span>
-        </div>
-        <button class="send-badge">send</button>
-    </div>
-    <div class="badge-item" data-badge="zen_enviroment6.png">
-        <div class="span-wrapper">
-            <img src="https://nobeltt.com/img/zen_enviroment6.png" />
+            <img src="https://nobeltt.com/img/zen_enviroment.png" />
             <span>Zen Enviroment</span>
         </div>
-        <button class="send-badge">send</button>
+        <button class="send-badge">Send</button>
     </div>
   </div>
       `
@@ -224,50 +62,68 @@ export function createBadgesModal(body) {
     body.appendChild(modal)
 }
 
-export function createBadInternetModal(body, image) {
-    const modal = document.createElement('div')
-    modal.className = 'bad-internet-connection'
-    modal.innerHTML = `
-    <div class="bad-internet-content">
-      <img src="${image}" alt="">
-      <span>Your internet is bad, please, try to reconect</span>
-    </div>
-    <span class="close-bad-internet-modal">×</span>
-    `
-    modal.style.display = 'none'
-    body.appendChild(modal)
-}
-
-export function createMessageModal(body) {
-    let modal = document.createElement('div')
-    modal.className = 'message-alert'
-    modal.style.display = 'none'
-    modal.innerHTML = `
+function createMessageModals(body) {
+    let messageModal = document.createElement('div')
+    messageModal.className = 'message-alert'
+    messageModal.style.display = 'none'
+    messageModal.innerHTML = `
+    <div class="message-wrapper">
     <div class="message-content">
-    <img class="message-avatar"></img>
-      <div class="message-text-wrapper">
-        <span class="message-from"></span><br/>
-        <span class="message"></span>
-      </div>
+        <img class="message-avatar"></img>
+        <div class="message-text-wrapper">
+            <span class="message-from"></span><br />
+            <span class="message"></span>
+        </div>
     </div>
     <span class="close-message-alert">×</span>
+    </div>
+    <div class="reply-wrapper">
+        <input placeholder="Reply" type="text" class="reply-input">
+        <button class="reply-button">send</button>
+    </div>
     `
-    body.appendChild(modal)
+    let topicMessageModal = document.createElement('div')
+    topicMessageModal.className = 'topic-alert'
+    topicMessageModal.style.display = 'none'
+    topicMessageModal.innerHTML = `
+    <div class="topic-message-wrapper">
+    <div class="topic-message-content">
+        <img class="topic-avatar"></img>
+        <div class="topic-text-wrapper">
+            <span class="topic-from">Topic Change</span><br />
+            <span class="topic-message"></span>
+        </div>
+    </div>
+    <span class="close-topic-alert">×</span>
+    </div>
+    `
+
+    let badgeMessageModal = document.createElement('div')
+    badgeMessageModal.className = 'badges-alert'
+    badgeMessageModal.style.display = 'none'
+    badgeMessageModal.innerHTML = `
+    <div class="badges-message-wrapper">
+    <div class="badges-message-content">
+        <img class="badges-avatar"></img>
+        <div class="badges-text-wrapper">
+            <span class="badges-from"></span><br />
+            <span class="badges-message"></span>
+        </div>
+    </div>
+    <span class="close-badges-alert">×</span>
+    </div>
+    `
+    body.appendChild(messageModal)
+    body.appendChild(badgeMessageModal)
+    body.appendChild(topicMessageModal)
 }
 
-export function createNotesModal(body) {
+function createNotesModal(body) {
     let notesModal = document.createElement('div')
     notesModal.className = 'notes-modal'
     notesModal.innerHTML = `
     <h2 class="notes-title">Add new note</h2>
     <input type="text" class="note" placeholder="Enter your note">
-    <div class="tags-input-wrapper">
-        <input maxlength="20" type="text" class="tags-input" placeholder="Enter your tags (max. 20 chars)">
-        <button class="add-tag">Add Tag</button>
-    </div>
-    <div class="tags">
-        <span class="no-tags">Your tags will be here...</span>
-    </div>
     <hr>
     <div class="notes-buttons">
         <button class="cancel-note">Cancel</button>
@@ -278,28 +134,13 @@ export function createNotesModal(body) {
     body.appendChild(notesModal)
 }
 
-export function createSendMessageModal(body) {
-    let modal = document.createElement('div');
-    modal.className = 'send-message-modal'
-    modal.innerHTML = `
-    <div class="send-message-input-wrapper">
-    <input type="text" class="modal-message" placeholder="">
-          <div class="modal-send">
-              Send
-          </div>
-      </div>
-      <span class="close-message-modal">×</span>
-    `
-    body.appendChild(modal)
-}
-
-export function createShadowModal(body) {
+function createShadowModal(body) {
     let modalShadow = document.createElement('div')
     modalShadow.className = 'modal-shadow'
     body.appendChild(modalShadow)
 }
 
-export function createTopicModal(body) {
+function createTopicModal(body) {
     let topicModal = document.createElement('div')
     topicModal.className = 'topic-modal'
     topicModal.innerHTML = `
@@ -349,3 +190,68 @@ export const optionButtons = `
     </div>
 </div>
 `
+
+function createListOfMessageUsers(body) {
+    const listOfMessageUsers = document.createElement('div')
+    listOfMessageUsers.className = 'message-list-wrapper'
+    listOfMessageUsers.innerHTML = `
+        <button class="close-chat-button">Close</button>
+        <div class="message-list">
+            <div class="empty-messages-list">
+                <img class="empty-messages-list-img" src="https://cdn-icons-png.flaticon.com/128/1144/1144760.png" />
+                <span class="empty-messages-list-text">Users will appear here...</span>
+            </div>
+        </div>
+    `
+    body.appendChild(listOfMessageUsers)
+}
+
+export function generateHTML(body) {
+    createListOfMessageUsers(body)
+    createTopicModal(body)
+    createShadowModal(body)
+    createNotesModal(body)
+    createMessageModals(body)
+    createBadgesModal(body)
+}
+
+export function addTopicAndNotesItems(optionsWrapper) {
+    const addedWrapperEl = document.createElement('div')
+    addedWrapperEl.className = 'options-added-wrapper'
+    addedWrapperEl.innerHTML = optionButtons
+
+    optionsWrapper.prepend(addedWrapperEl)
+}
+
+export function addTopicAndDashboardFlags(url, date, meetingName) {
+
+    let dashboardLink = document.createElement('div');
+    dashboardLink.className = 'dashboard-link-wrapper';
+    dashboardLink.innerHTML = `
+      <img class="dashboard-link-image" data-linkactive="" src="https://cdn-icons-png.flaticon.com/128/4050/4050374.png"/>
+      <a class="dashboard-link" href="https://nobeltt.com/dashboard/${url}/${date}?q=${meetingName}">Visit dashboard</a>
+    `;
+    document.body.appendChild(dashboardLink);
+
+    let topicWrapper = document.createElement('div');
+    topicWrapper.className = 'curr-topic-wrapper';
+    topicWrapper.innerHTML = `
+      <img class="curr-topic-image" data-topicactive="" src="https://cdn-icons-png.flaticon.com/128/4886/4886806.png"/>
+      <span class="curr-topic">No topic yet</span>
+    `;
+    document.body.appendChild(topicWrapper);
+}
+
+export async function setOpenChatButton() {
+    const { current_name } = await new Promise(resolve => chrome.storage.local.get(['current_name'], resolve));
+    const { host } = await new Promise(resolve => chrome.storage.local.get(['host'], resolve));
+    if ((current_name && host) && current_name === host) {
+      const openChat = document.createElement('div')
+      openChat.className = 'open-chat-button'
+      openChat.innerHTML = `
+              <span class="open-chat-span">Chat</span>
+              <div class="message-indicator">0</div>
+            `
+      document.body.appendChild(openChat)
+    }
+  }

@@ -1,136 +1,62 @@
-
 window.onload = async function () {
-
-  let tagsAdded = []
-
-  let badgeModalWrapper, messageAlert, badges, badgeSearchInput, messageInput, sendMessageModal, badInternetModal, notesModal, tags, noTagsSpan, topicModal, topicInput, optionButtonsMarkUp, modalShadow;
+  const { generateHTML, addTopicAndNotesItems, addTopicAndDashboardFlags, setOpenChatButton } = await import(chrome.runtime.getURL('./resources/html.js'))
+  const { waitForElement, $el, dashboardAndTopicVisual, openTopicAndNotesModal, closeBadgesModal, openBadgesModal, sendBadge, createNote, closeNotesModal, closeTopicModal, setNewTopic, openChat, closeChat, openChatSpace, returnToMainChat, sendChatMessage, searchBadges } = await import(chrome.runtime.getURL('./resources/helper.functions.js'));
+  const { setHost, setCurrentName } = await import(chrome.runtime.getURL('./resources/storage.functions.js'));
+  const { sendMessageToHost, messageToHost, messageFromHost, messageBadge, messageTopic } = await import(chrome.runtime.getURL('./resources/message.functions.js'));
+  const { addUserToChat, removeUserFromChat } = await import(chrome.runtime.getURL('./resources/chat.functions.js'));
+  const { addUser } = await import(chrome.runtime.getURL('./resources/user.functions.js'));
+  const { addMeeting } = await import(chrome.runtime.getURL('./resources/meeting.functions.js'));
+  let badgeModalWrapper, badges, badgeSearchInput, notesModal, topicModal, topicInput, modalShadow, listOfMessageUsers, openChatButton, optionsWrapper;
 
   const parsed_URL = window.location.href.split('/').slice(-1).toString().slice(0, 12);
-  const LINK = 'https://nobeltt.com/'
+  const DASHBOARD_LINK = 'https://nobeltt.com/'
+  const CHAT_LINK = 'https://adventurous-glorious-actor.glitch.me/stream-messages'
+  // const DASHBOARD_LINK = 'http://localhost:3001/'
   const DATE = new Date().toISOString().split('T')[0]
   const body = document.querySelector('body');
 
-  const eventSource = new EventSource('https://adventurous-glorious-actor.glitch.me/stream-messages');
-  eventSource.onmessage = (event) => {
+  const event_source = new EventSource(CHAT_LINK);
+  event_source.onmessage = async (event) => {
     const message = JSON.parse(event.data);
-    const messageModal = document.querySelector('.message-alert')
-    const modalShadow = document.querySelector('.modal-shadow')
-    const messageAvatar = document.querySelector('.message-avatar')
-    const messageElem = messageModal.querySelector('.message')
-    const messageFrom = messageModal.querySelector('.message-from')
-    messageElem.innerHTML = message.message
-    chrome.storage.local.get(["current_name"], function (storageFirst) {
-      if (message.type === 'CHAT') {
-        if (message.to === storageFirst.current_name && message.url === parsed_URL) {
-          fetch(`${LINK}users/${message.name}`)
-            .then(res => res.json())
-            .then(response => {
-              messageAvatar.src = response.avatar
-              modalShadow.style.display = 'flex'
-              messageFrom.innerHTML = message.name
-              messageModal.style.display = 'flex'
-            })
-        }
-      }
-      else if (message.type === 'TOPIC') {
-        if (message.url === parsed_URL && message.date === DATE) {
-          messageFrom.innerHTML = 'Topic change'
-          messageModal.style.display = 'flex'
-          modalShadow.style.display = 'flex'
-          const currTopic = document.querySelector('.curr-topic')
-          currTopic.innerHTML = message.message;
 
-        }
-      }
-      else if (message.type === 'BADGE') {
-        if (message.url === parsed_URL && message.date === DATE && storageFirst.current_name === message.to) {
-          messageFrom.innerHTML = 'New badge!'
-          messageModal.style.display = 'flex'
-          modalShadow.style.display = 'flex'
-        }
-      }
-    })
+    const messageFunctions = {
+      'BADGE': () => { messageBadge(message, DATE, parsed_URL) },
+      'TOPIC': () => { messageTopic(message, DATE, parsed_URL) },
+      'MESSAGE_FROM_HOST': () => { messageFromHost(message) },
+      'MESSAGE_TO_HOST': () => { messageToHost(message) }
+    }
+
+    messageFunctions[message.type]()
+
   };
 
   (async () => {
-    const { createBadgesModal, createSendMessageModal, createBadInternetModal, createMessageModal, createNotesModal, createTopicModal, optionButtons, createShadowModal } = await import(chrome.runtime.getURL('./resources/html.js'));
-    const badInternetModalImage = chrome.runtime.getURL("./resources/warning.png")
-    createBadgesModal(document.body);
-    createSendMessageModal(document.body);
-    createBadInternetModal(document.body, badInternetModalImage);
-    createMessageModal(document.body);
-    createNotesModal(document.body);
-    createTopicModal(document.body);
-    createShadowModal(document.body);
-    optionButtonsMarkUp = optionButtons
+    generateHTML(document.body)
   })()
     .then(() => {
       badgeModalWrapper = document.querySelector('.badge-modal-wrapper')
-      messageInput = document.querySelector('.badge-search')
       badges = document.querySelectorAll('.badge-item')
       badgeSearchInput = document.querySelector('.badge-search')
-      sendMessageModal = document.querySelector('.send-message-modal')
-      messageInput = document.querySelector('.modal-message')
-      badInternetModal = document.querySelector('.bad-internet-connection')
-      messageAlert = document.querySelector('.message-alert')
       notesModal = document.querySelector('.notes-modal')
-      tags = document.querySelector('.tags')
       topicModal = document.querySelector('.topic-modal')
       topicInput = document.querySelector('.topic-input')
-      noTagsSpan = document.querySelector('.no-tags')
       modalShadow = document.querySelector('.modal-shadow')
+      listOfMessageUsers = document.querySelector('.message-list-wrapper')
     })
     .then(() => {
-      function addUser(arr) {
-        Array.from(arr).forEach(user => {
-          const userInfo = user.querySelector('.SKWIhd')
-          const userAvatar = userInfo.querySelector('.BEaVse > img')
-          const userName = userInfo.querySelector('.zSX24d > .jKwXVe > .zWGUib')
-          console.log(1)
-
-          fetch(`${LINK}users/create/${parsed_URL}/${DATE}`, {
-            method: 'POST',
-            headers: {
-              'Accept': 'application/json',
-              'Content-Type': 'application/json',
-              'Token': 'Bearer 580792'
-            },
-            body: JSON.stringify({
-              name: userName.textContent,
-              avatar: userAvatar.src,
-              date: DATE
-            })
-          })
-        })
-      }
-
-      let optionsObserver = new MutationObserver(function (mutations) {
+      let optionsObserver = new MutationObserver(async function (mutations) {
         for (mutation of mutations) {
-          if (mutation.addedNodes[0]?.className === 'pw1uU') {
-            const optionsWrapper = document.querySelector('ul[aria-label="Call options"')
+          let [addedNodes] = mutation.addedNodes
+          if (addedNodes?.className === 'pw1uU') {
+            optionsWrapper = document.querySelector('ul[aria-label="Call options"')
             const addedWrapper = document.querySelector('.options-added-wrapper')
 
             if (optionsWrapper && !addedWrapper) {
-              const addedWrapperEl = document.createElement('div')
-              addedWrapperEl.className = 'options-added-wrapper'
-              addedWrapperEl.innerHTML = optionButtonsMarkUp
-
-              optionsWrapper.prepend(addedWrapperEl)
-              const topicWrapper = document.querySelector('.topic-wrapper')
-              const noteWrapper = document.querySelector('.note-wrapper')
-
-              topicWrapper.onclick = function () {
-                modalShadow.style.display = 'flex'
-                topicModal.style.display = 'flex'
-                optionsWrapper.style.display = 'none'
-              }
-
-              noteWrapper.onclick = function () {
-                modalShadow.style.display = 'flex'
-                notesModal.style.display = 'block'
-                optionsWrapper.style.display = 'none'
-              }
-
+              addTopicAndNotesItems(optionsWrapper)
+              const openNotes = await waitForElement('.note-wrapper')
+              openNotes.onclick = () => { openTopicAndNotesModal(modalShadow, notesModal, optionsWrapper) }
+              const openTopic = await waitForElement('.topic-wrapper')
+              openTopic.onclick = () => { openTopicAndNotesModal(modalShadow, topicModal, optionsWrapper) }
             }
           }
         }
@@ -138,288 +64,142 @@ window.onload = async function () {
 
       optionsObserver.observe(document.body, { attributes: false, childList: true, characterData: false, subtree: true });
 
-      const usersInterval = setInterval(() => {
-        const listOfUsers = document.querySelector('.GvcuGe')
-        if (listOfUsers) {
-          Array.from(listOfUsers.children).forEach(user => {
-            const username = user.querySelector('.zWGUib')
-            if (username?.nextElementSibling?.textContent === '(You)') {
-              chrome.storage.local.set({ "current_name": username.textContent.trim() })
+      (async function () {
+        const listOfUsers = await waitForElement('.GvcuGe');
+        await setCurrentName(listOfUsers.children)
+        await setHost(listOfUsers.children)
+        await setOpenChatButton()
+          .then(() => {
+            openChatButton = document.querySelector('.open-chat-button')
+            openChatButton.style.display = 'flex'
+          })
+        addUser(listOfUsers.children, parsed_URL, DATE, DASHBOARD_LINK);
+        addUserToChat(listOfUsers.children)
+
+        const meetingName = (await waitForElement('.u6vdEc')).textContent.trim();
+        addMeeting(meetingName, parsed_URL, DATE, DASHBOARD_LINK)
+
+        let usersListObserver = new MutationObserver(function (mutations) {
+          mutations.forEach(function (mutation) {
+            if (mutation.addedNodes.length) {
+              addUser(mutation.addedNodes, parsed_URL, DATE, DASHBOARD_LINK);
+              addUserToChat(mutation.addedNodes)
             }
-          })
-          clearInterval(usersInterval)
-
-          const meetingName = document.querySelector('.u6vdEc').textContent
-          if (meetingName !== 'Ready to join?' && meetingName.trim() !== '' && meetingName !== 'Meeting details') {
-            fetch(`${LINK}main/addmeeting`, {
-              method: "POST",
-              headers: {
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({
-                name: meetingName,
-                url: parsed_URL,
-                date: DATE
-              })
-            })
-          }
-
-          let usersListObserver = new MutationObserver(function (mutations) {
-            mutations.forEach(function (mutation) {
-              if (mutation.addedNodes.length) {
-                addUser(mutation.addedNodes)
-              }
-            });
+            else if (mutation.removedNodes.length) removeUserFromChat(mutation)
           });
+        });
 
-          let config = { attributes: true, childList: true, characterData: true }
-          usersListObserver.observe(listOfUsers, config);
-          addUser(listOfUsers.children)
-        }
-      }, 2500)
+        let config = { attributes: true, childList: true, characterData: true };
+        usersListObserver.observe(listOfUsers, config);
+      })();
 
-      let meetingNameInterval = setInterval(() => {
-        const indicator = document.querySelector('.talk-time-user-wrapper')
-        if (indicator) {
-          let meetingName = document.querySelector('.ouH3xe')
-          let dashboardLink = document.createElement('div')
-          dashboardLink.className = 'dashboard-link-wrapper'
-          dashboardLink.innerHTML = `
-            <img class="dashboard-link-image" data-linkactive="" src="https://cdn-icons-png.flaticon.com/128/4050/4050374.png"/>
-            <a class="dashboard-link" href="https://nobeltt.com/dashboard/${parsed_URL}/${DATE}?q=${meetingName.textContent}">Visit dashboard</a>
-          `
-          document.body.appendChild(dashboardLink)
+      (async function () {
+        const meetingName = (await waitForElement('.ouH3xe')).textContent;
+        addTopicAndDashboardFlags(parsed_URL, DATE, meetingName)
+      })();
 
-          let topicWrapper = document.createElement('div')
-          topicWrapper.className = 'curr-topic-wrapper'
-          topicWrapper.innerHTML = `
-            <img class="curr-topic-image" data-topicactive="" src="https://cdn-icons-png.flaticon.com/128/4886/4886806.png"/>
-            <span class="curr-topic">No topic yet</span>
-          `
-          document.body.appendChild(topicWrapper)
-          clearInterval(meetingNameInterval)
-        }
-      }, 2000)
+      (async function () {
+        const closeBadgeModal = (await waitForElement('.close-badges-modal'))
+        closeBadgeModal.onclick = () => { closeBadgesModal(modalShadow, badgeModalWrapper, badgeSearchInput, badges) }
+      })();
 
-      function $el(tag, props) {
-        let p, el = document.createElement(tag);
-        if (props) {
-          for (p in props) {
-            el[p] = props[p];
-          }
-        }
-        return el;
-      }
-
-
-      function closeBadgesModal() {
+      function closeMessageModal(e) {
+        const modal = e.target.parentElement.parentElement;
         modalShadow.style.display = 'none'
-        badgeModalWrapper.style.display = 'none'
-        badgeSearchInput.value = ''
-        badges.forEach(badge => {
-          badge.style.display = 'flex'
-        })
+        modal.style.display = 'none'
       }
 
-      function openBadgesModal(e) {
-        modalShadow.style.display = 'flex'
-        badgeModalWrapper.style.display = 'flex'
-        let attr = e.target.parentElement.getAttribute('data-name')
-        chrome.storage.local.set({ "badge_name": attr })
-      }
+      (async function () {
+        const createNoteButton = await waitForElement('.add-note')
+        createNoteButton.onclick = () => { createNote(modalShadow, DASHBOARD_LINK, parsed_URL, DATE, notesModal) }
+      })();
 
-      function closeMessageModal() {
-        messageAlert.style.display = 'none'
-        modalShadow.style.display = 'none'
-      }
+      (async function () {
+        const closeNoteModalButton = await waitForElement('.cancel-note')
+        closeNoteModalButton.onclick = () => { closeNotesModal(modalShadow, notesModal) }
+      })();
 
-      function sendMessage() {
-        const messageValue = messageInput.value;
-        if (messageValue.trim()) {
-          modalShadow.style.display = 'none'
-          chrome.storage.local.get(["current_name"], function (storageFirst) {
-            chrome.storage.local.get(["to_name"], async function (storageSecond) {
-              fetch('https://adventurous-glorious-actor.glitch.me/send-messages', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: storageFirst.current_name, url: parsed_URL, message: messageValue, to: storageSecond.to_name, type: "CHAT" })
-              })
-            })
-            messageInput.value = ''
-          });
-          sendMessageModal.style.display = 'none'
+      (async function () {
+        const closeTopicModalButton = await waitForElement('.close-topic-modal')
+        closeTopicModalButton.onclick = () => { closeTopicModal(modalShadow, topicModal, topicInput) }
+      })();
+
+      (async function () {
+        const setNewTopicButton = await waitForElement('.set-topic')
+        setNewTopicButton.onclick = () => { setNewTopic(topicInput, parsed_URL, DATE, modalShadow, topicModal) }
+      })();
+
+      (async function() {
+        const dashboardLink = await waitForElement('.dashboard-link-image')
+        dashboardLink.onclick = () => {
+          dashboardAndTopicVisual(dashboardLink, '.dashboard-link', 90)
         }
-      }
+      })();
 
-      function closeSendMessageModal() {
-        modalShadow.style.display = 'none'
-        sendMessageModal.style.display = 'none'
-        messageInput.value = ''
-      }
+      (async function() {
+        const dashboardLink = await waitForElement('.curr-topic-image')
+        dashboardLink.onclick = () => {
+          dashboardAndTopicVisual(dashboardLink, '.curr-topic', 100)
+        }
+      })();
 
-      function giveBadge(e) {
-        modalShadow.style.display = 'none'
-        chrome.storage.local.get(['current_name'], async function (storageFirst) {
-          chrome.storage.local.get(["badge_name"], async function (storage) {
-            let src = e.target.parentElement.dataset.badge
-            let badgeName = e.target.previousElementSibling.querySelector('span').textContent
+      (async function() {
+        const openMessageListButton = (await waitForElement('.open-chat-button'));
+        openMessageListButton.onclick = () => { openChat(listOfMessageUsers, openChatButton) }
+      })();
 
-            fetch(`${LINK}badges/givebadge/${parsed_URL}/${storage.badge_name}/${DATE}`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({
-                badge: src,
-              })
-            })
-              .then(() => {
-                fetch('https://adventurous-glorious-actor.glitch.me/send-messages', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ title: 'New badge!', url: parsed_URL, date: DATE, message: `You received ${badgeName} badge from ${storageFirst.current_name}!`, to: storage.badge_name, type: "BADGE" })
-                })
-              })
-            badgeModalWrapper.style.display = 'none'
+      (async function() {
+        const closeChatButton = (await waitForElement('.close-chat-button'))
+        closeChatButton.onclick = () => { closeChat(listOfMessageUsers, openChatButton) }
+      })();
+
+      (async function replyToHost() {
+        const replyButton = await waitForElement('.reply-button')
+        replyButton.onclick = () => { sendMessageToHost(parsed_URL) }
+      })();
+
+      (async function() {
+        const searchBadgesInput = await waitForElement('.badge-search')
+        searchBadgesInput.oninput = () => { searchBadges(searchBadgesInput, badges) }
+      })();
+
+      let percentageInterval = setInterval(() => {
+        let talkTimeContainer = document.querySelector('#talk-time-container')
+        if (talkTimeContainer) {
+          let percentages = document.querySelectorAll('.talk-time-table > tr')
+          let percentObject = {}
+          percentages.forEach(percentage => {
+            let name = percentage.querySelector('.talk-time-name').textContent
+            let percent = percentage.querySelector('.talk-time-pct').textContent
+            percentObject.name = name;
+            percentObject.percent = percent;
           })
-        })
-      }
-
-      function closeBadInternetModal() {
-        body.removeChild(badInternetModal)
-      }
-
-      function openSendMessageModal(e) {
-        modalShadow.style.display = 'flex'
-        const name = e.target.parentElement.dataset.name
-        chrome.storage.local.set({ "to_name": name })
-        document.querySelector('.modal-message').placeholder = `Send message to ${name}?`
-        sendMessageModal.style.display = 'flex'
-      }
-
-      function createNote() {
-        modalShadow.style.display = 'none'
-        let note = document.querySelector('.note')
-        let tagElements = document.querySelectorAll('.tag')
-        if (note.value) {
-          fetch(`${LINK}newconclusion/${parsed_URL}/${DATE}`, {
+          fetch(`${DASHBOARD_LINK}percentage/${parsed_URL}/${DATE}`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-              text: note.value,
-              url: parsed_URL,
-              tags: tagsAdded
+              percents: percentObject
             })
           })
-            .then(() => {
-              notesModal.style.display = 'none'
-              tagElements.forEach(tagElement => {
-                tags.removeChild(tagElement)
-              })
-              noTagsSpan.style.display = 'flex'
-            })
         }
-
-      }
-
-      function addTag() {
-        let tagsInput = document.querySelector('.tags-input')
-        const tagValue = tagsInput.value
-        if (tagValue.trim()) {
-          tags.style.height = 'fit-content'
-          let tag = document.createElement('div')
-          tag.className = 'tag'
-          tag.innerHTML = `× ${tagValue}`
-          tags.appendChild(tag)
-          noTagsSpan.style.display = 'none'
-          tagsAdded.push(tagValue)
-          tagsInput.value = ''
-        }
-      }
-
-      function deleteTag(e) {
-        tags.removeChild(e.target)
-        if (tags.children.length === 1) {
-          noTagsSpan.style.display = 'flex'
-        }
-        tagsAdded = tagsAdded.filter(tag => tag != e.target.textContent.slice(2))
-      }
-
-      function closeNoteModal() {
-        modalShadow.style.display = 'none'
-        let tagsInput = document.querySelector('.tags-input')
-        let noteInput = document.querySelector('.note')
-        notesModal.style.display = 'none'
-        tagsInput.value = ''
-        noteInput.value = ''
-
-      }
-
-      function closeTopicModal() {
-        modalShadow.style.display = 'none'
-        topicModal.style.display = 'none'
-        topicInput.value = ''
-      }
-
-      async function setNewTopic() {
-        const topicValue = topicInput.value;
-        fetch('https://adventurous-glorious-actor.glitch.me/send-messages', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url: parsed_URL, date: DATE, message: `Current topic of the meeting: ${topicValue}`, to: 'everyone', type: "TOPIC" })
-        })
-
-        modalShadow.style.display = 'none'
-        topicModal.style.display = 'none'
-        topicInput.value = ''
-      }
-
-      function visualOptions(e, selector, topValue) {
-        const wrapper = document.querySelector(selector);
-        const button = e.target;
-        const attr = button.dataset.active;
-        button.dataset.active = attr ? '' : 'true';
-        button.style.transform = attr ? `rotate(360deg)` : `rotate(-360deg)`;
-        wrapper.style.top = attr ? `-${topValue}px` : '0';
-      }
+      }, 10000)
 
       body.onclick = function (e) {
         const options = {
-          'send-badge': giveBadge,
           'close-message-alert': closeMessageModal,
-          'give-badge-button': openBadgesModal,
-          'close-badge-modal': closeBadgesModal,
-          'modal-send': sendMessage,
-          'close-message-modal': closeSendMessageModal,
-          'close-bad-internet-modal': closeBadInternetModal,
-          'send-message-button': openSendMessageModal,
-          'cancel-note': closeNoteModal,
-          'add-note': createNote,
-          'add-tag': addTag,
-          'tag': deleteTag,
-          'close-topic-modal': closeTopicModal,
-          'set-topic': setNewTopic,
-          'dashboard-link-image': () => {visualOptions(e, '.dashboard-link', 90)},
-          'curr-topic-image': () => {visualOptions(e, '.curr-topic', 50)}
+          'close-badges-alert': closeMessageModal,
+          'close-topic-alert': closeMessageModal,
+          'open-badges-modal': () => { openBadgesModal(e, modalShadow, badgeModalWrapper) },
+          'send-badge': () => { sendBadge(e, modalShadow, DASHBOARD_LINK, parsed_URL, DATE, badgeModalWrapper) },
+          'chat-user-avatar': openChatSpace,
+          'chat-user-name': openChatSpace,
+          'chat-user': openChatSpace,
+          'chat-space-button': () => { sendChatMessage(e, parsed_URL) },
+          'chat-space-arrow-back': () => { returnToMainChat(e, openChatButton) }
         }
         options?.[e.target.className]?.(e)
-      }
-
-      body.oninput = function (e) {
-        if (e.target.className === 'badge-search') {
-          let value = e.target.value.toLowerCase()
-          badges.forEach(badge => {
-            let badgeName = badge.querySelector('.span-wrapper > span')
-            if (!badgeName.textContent.toLowerCase().includes(value) && value) {
-              badge.style.display = 'none'
-            }
-            else {
-              badge.style.display = 'flex'
-            }
-          })
-        }
       }
 
       // Default config
@@ -499,8 +279,6 @@ window.onload = async function () {
           <img class="talk-time-logo" style=" filter: grayscale(1) invert(1);" src="https://cdn-icons-png.flaticon.com/24/1827/1827379.png" />
         </div>
         <div class="talk-time-header">
-          <div class="talk-time-show-groups">Show Groups</div>
-          <div class="talk-time-hide-groups">Hide Groups</div>
           <div class="talk-time-summary">Total Talk Time: <span id="talk-time-summary-total"></span></div>
         </div>
         <div class="talk-time-body">
@@ -515,8 +293,6 @@ window.onload = async function () {
           dom_container.querySelector(selector).addEventListener('click', f);
         };
         onclick('.talk-time-top', () => { dom_container.classList.toggle("collapsed"); });
-        onclick('.talk-time-show-groups', () => { dom_container.classList.add('show_groups'); });
-        onclick('.talk-time-hide-groups', () => { dom_container.classList.remove('show_groups'); });
       }
 
       // Create the group rendering table
@@ -546,8 +322,7 @@ window.onload = async function () {
             <td class="talk-time-name">${record.name}</td>
             <td class="talk-time-time">0:00</td>
             <td class="talk-time-pct unique_pct_selector">0%</td>
-            <button class="send-message-button">Send Message</button>
-            <button class="give-badge-button">Give Badge</button>
+            <button class="open-badges-modal">Give Badge</button>
             <td class="talk-time-groups">${createParticipantRowGroups(record)}</td>
           `;
         record.row = row;
@@ -765,44 +540,12 @@ window.onload = async function () {
       }
 
       setInterval(pulse, config.pulse_timeslice);
-      setInterval(() => {
-        let talkTimeContainer = document.querySelector('#talk-time-container')
-        if (talkTimeContainer) {
-          let percentages = document.querySelectorAll('.talk-time-table > tr')
-          let percentObject = []
-          percentages.forEach(percentage => {
-            let name = percentage.querySelector('.talk-time-name').textContent
-            let percent = percentage.querySelector('.talk-time-pct').textContent
-            percentObject.push({
-              name,
-              percent
-            })
-          })
-          fetch(`${LINK}percentage/${parsed_URL}/${DATE}`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              percents: percentObject
-            })
-          })
-        }
-      }, 10000)
 
       // ==================================================================
       // SPEECH DETECTION
       // ==================================================================
       // Watch for the talk icon to animate
       let observer = new MutationObserver(function (mutations) {
-
-        if (window.navigator.connection.downlink < 1.2 && window.navigator.connection.downlink > 0) {
-          let badInternetConn = document.querySelector('.bad-internet-connection')
-          if (badInternetConn) {
-
-            document.querySelector('.bad-internet-connection').style.display = 'flex'
-          }
-        }
 
         try {
           const allTr = document.querySelectorAll('.talk-time-table > tr')
@@ -826,8 +569,7 @@ window.onload = async function () {
             let allTr = document.querySelectorAll('.talk-time-table > tr')
             allTr.forEach(tr => {
               if (tr.dataset.name === storage.current_name) {
-                tr.querySelector('.send-message-button').disabled = true
-                tr.querySelector('.give-badge-button').disabled = true
+                tr.querySelector('.open-badges-modal').disabled = true
               }
             })
           })
