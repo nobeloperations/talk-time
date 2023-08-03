@@ -1,5 +1,6 @@
 const { current_name } = await new Promise(resolve => chrome.storage.local.get(['current_name'], resolve));
 
+// adding user to chat list , so host can see and message 
 function createChatUser(user, username) {
     const emptyListElement = document.querySelector('.empty-messages-list')
     const avatar = user.querySelector('.KjWwNd').src
@@ -18,6 +19,7 @@ function createChatUser(user, username) {
     emptyListElement.style.display = 'none'
 }
 
+// create element with input and container where messages will appear
 function createChatSpace(username) {
     const chatSpace = document.createElement('div')
     chatSpace.className = 'chat-space-wrapper'
@@ -37,6 +39,7 @@ function createChatSpace(username) {
     document.body.appendChild(chatSpace)
 }
 
+//function that invokes two functions to completely add user to chat 
 export function addUserToChat(nodes) {
     Array.from(nodes).forEach(async user => {
         const username = user.querySelector('.zWGUib').textContent.trim()
@@ -47,6 +50,7 @@ export function addUserToChat(nodes) {
     })
 }
 
+//if user leaves meet , we remove it from chat
 export function removeUserFromChat(mutation) {
     const removedUser = mutation.removedNodes[0]
     const username = removedUser.querySelector('.zWGUib').textContent.replaceAll(' ', '')

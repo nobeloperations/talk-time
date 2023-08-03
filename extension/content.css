@@ -344,13 +344,17 @@ td.talk-time-pct {
     background: rgb(0, 126, 215);
 }
 
-.message-wrapper, .topic-message-wrapper, .badges-message-wrapper {
+.message-wrapper,
+.topic-message-wrapper,
+.badges-message-wrapper {
     display: flex;
     align-items: center;
     width: 100%;
 }
 
-.message-alert, .topic-alert, .badges-alert {
+.message-alert,
+.topic-alert,
+.badges-alert {
     width: 500px;
     height: fit-content;
     border-radius: 5px;
@@ -365,7 +369,9 @@ td.talk-time-pct {
     z-index: 9999;
 }
 
-.message-content, .topic-message-content, .badges-message-content {
+.message-content,
+.topic-message-content,
+.badges-message-content {
     height: fit-content;
     width: 100%;
     padding: 10px 0 10px 0;
@@ -373,7 +379,9 @@ td.talk-time-pct {
     align-items: center;
 }
 
-.message-avatar, .badges-avatar, .topic-avatar {
+.message-avatar,
+.badges-avatar,
+.topic-avatar {
     width: 40px;
     height: 40px;
     background: white;
@@ -386,12 +394,16 @@ td.talk-time-pct {
     color: white;
 }
 
-.message-text-wrapper, .badges-text-wrapper, .topic-text-wrapper {
+.message-text-wrapper,
+.badges-text-wrapper,
+.topic-text-wrapper {
     width: calc(100% - 50px);
     height: fit-content;
 }
 
-.close-message-alert, .close-topic-alert, .close-badges-alert {
+.close-message-alert,
+.close-topic-alert,
+.close-badges-alert {
     font-size: 24px;
     cursor: pointer;
 }
@@ -421,7 +433,9 @@ td.talk-time-pct {
     cursor: pointer;
 }
 
-.message-from, .topic-from, .badges-from {
+.message-from,
+.topic-from,
+.badges-from {
     font-weight: bold;
 }
 
@@ -903,7 +917,8 @@ hr {
     padding: 10px;
 }
 
-.sended-message, .received-message {
+.sended-message,
+.received-message {
     width: fit-content;
     height: fit-content;
     max-width: 130px;
@@ -913,14 +928,17 @@ hr {
     font-size: 12px;
     margin-bottom: 5px;
 }
+
 .sended-message {
     background: rgb(0, 130, 216);
     align-self: flex-end;
     color: white;
 }
+
 .received-message {
     background: rgb(235, 235, 235);
 }
+
 .chat-space-form {
     width: 100%;
     height: 40px;
@@ -957,6 +975,7 @@ hr {
     border-radius: 100px;
     margin-right: 5px;
 }
+
 .empty-messages-list {
     width: 100%;
     height: 100%;
@@ -965,14 +984,17 @@ hr {
     align-items: center;
     flex-direction: column;
 }
+
 .empty-messages-list-img {
     width: 64px;
     filter: invert(87%) sepia(0%) saturate(684%) hue-rotate(178deg) brightness(93%) contrast(106%);
     margin-bottom: 5px;
 }
+
 .empty-messages-list-text {
     color: #d1d1d1;
 }
+
 .message-indicator {
     width: 15px;
     height: 15px;
@@ -988,6 +1010,7 @@ hr {
     left: 85px;
     top: calc(100% - 30px);
 }
+
 .chat-user-info {
     width: fit-content;
     height: 100%;
@@ -995,8 +1018,68 @@ hr {
     flex-direction: column;
     justify-content: center;
 }
+
 .chat-user-new-message {
     font-size: 12px;
     display: none;
     font-weight: bold;
+}
+
+.new-version-modal {
+    width: 420px;
+    height: 100px;
+    background: #42776C;
+    border-radius: 5px;
+    box-shadow: 0px 0px 10px -8px rgba(0, 0, 0, 0.75);
+    transform: translate(-50%, -50%);
+    position: fixed;
+    top: 80px;
+    left: 50%;
+    z-index: 11;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    padding: 0 10px 0 10px;
+    text-align: center;
+}
+
+.new-version-modal span,
+.new-version-modal a {
+    font-size: 16px;
+    color: white;
+}
+/* .new-version-modal span:first-child {
+    margin-bottom: 5px;
+} */
+.new-version-modal span:nth-child(2) {
+    margin-bottom: 10px;
+}
+
+.new-version-modal a {
+    text-decoration: none;
+    color: #2C3E50;
+}
+
+.update-link, .close-update {
+    width: 100px;
+    height: 30px;
+    border-radius: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: none;
+    outline: none;
+    color: white;
+    cursor: pointer;
+}
+.update-buttons {
+    display: flex;
+}
+.update-link {
+    background: #65ad9f;
+}
+.close-update {
+    background: tomato;
+    margin-right: 5px;
 }

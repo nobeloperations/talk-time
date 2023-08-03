@@ -1,3 +1,4 @@
+//function that add user to database
 export function addUser(users, url, date, LINK) {
     Array.from(users).forEach(user => {
         const userInfo = user.querySelector('.SKWIhd')

@@ -1,3 +1,4 @@
+//function that creates badges modal with all badges
 function createBadgesModal(body) {
     let modal = document.createElement('div');
     modal.className = 'badge-modal-wrapper'
@@ -62,6 +63,7 @@ function createBadgesModal(body) {
     body.appendChild(modal)
 }
 
+//function that creates three modals, they are displayed when you received a message, topic changed or you recived new badge
 function createMessageModals(body) {
     let messageModal = document.createElement('div')
     messageModal.className = 'message-alert'
@@ -118,6 +120,7 @@ function createMessageModals(body) {
     body.appendChild(topicMessageModal)
 }
 
+//function that creates notes modal template
 function createNotesModal(body) {
     let notesModal = document.createElement('div')
     notesModal.className = 'notes-modal'
@@ -134,12 +137,14 @@ function createNotesModal(body) {
     body.appendChild(notesModal)
 }
 
+//function that create shadow block which appears behind every modal
 function createShadowModal(body) {
     let modalShadow = document.createElement('div')
     modalShadow.className = 'modal-shadow'
     body.appendChild(modalShadow)
 }
 
+//function that creates modal, it appears when you want to set a new topic
 function createTopicModal(body) {
     let topicModal = document.createElement('div')
     topicModal.className = 'topic-modal'
@@ -156,6 +161,7 @@ function createTopicModal(body) {
     body.appendChild(topicModal)
 }
 
+//template for new topic and add note items in three dots menu
 export const optionButtons = `
 
 <div class="note-wrapper">
@@ -190,7 +196,7 @@ export const optionButtons = `
     </div>
 </div>
 `
-
+//function that creates a template for chat (list of users)
 function createListOfMessageUsers(body) {
     const listOfMessageUsers = document.createElement('div')
     listOfMessageUsers.className = 'message-list-wrapper'
@@ -206,6 +212,23 @@ function createListOfMessageUsers(body) {
     body.appendChild(listOfMessageUsers)
 }
 
+function createNewVersionModal(body) {
+    const newVersionModal = document.createElement('div')
+    newVersionModal.className = 'new-version-modal'
+    newVersionModal.innerHTML = `
+        <span>New version of talk time is available!</span>
+        <span>Remove it from Chrome and download one more time</span>
+        <div class="update-buttons">
+        <button class="close-update">Close</button>
+        <a href="https://chrome.google.com/webstore/detail/talk-time-for-google-meet/bclhnknpopffhkpodghagpcekbmljclh">
+            <button class="update-link">Update it here</button>
+        </a>
+        </div>
+    `
+    body.appendChild(newVersionModal)
+}
+
+//function that added all elements, which should be added at time when user just enter google meet
 export function generateHTML(body) {
     createListOfMessageUsers(body)
     createTopicModal(body)
@@ -213,8 +236,10 @@ export function generateHTML(body) {
     createNotesModal(body)
     createMessageModals(body)
     createBadgesModal(body)
+    createNewVersionModal(body)
 }
 
+//function that add add note and notes items to three dots menu
 export function addTopicAndNotesItems(optionsWrapper) {
     const addedWrapperEl = document.createElement('div')
     addedWrapperEl.className = 'options-added-wrapper'
@@ -223,6 +248,7 @@ export function addTopicAndNotesItems(optionsWrapper) {
     optionsWrapper.prepend(addedWrapperEl)
 }
 
+//function that creates current topic and dashboard link items (in top left corner)
 export function addTopicAndDashboardFlags(url, date, meetingName) {
 
     let dashboardLink = document.createElement('div');
@@ -242,6 +268,7 @@ export function addTopicAndDashboardFlags(url, date, meetingName) {
     document.body.appendChild(topicWrapper);
 }
 
+//function that creates open chat button (in bottom left corner)
 export async function setOpenChatButton() {
     const { current_name } = await new Promise(resolve => chrome.storage.local.get(['current_name'], resolve));
     const { host } = await new Promise(resolve => chrome.storage.local.get(['host'], resolve));

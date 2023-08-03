@@ -1,3 +1,5 @@
+
+//function that set name of user, application needs to know you meeting name to work (chrome.storage is like localStorage or cookies)
 export async function setCurrentName(nodes) {
     return new Promise(function (resolve, reject) {
         Array.from(nodes).forEach(user => {
@@ -10,6 +12,7 @@ export async function setCurrentName(nodes) {
     });
 }
 
+//function that set host name , application needs it to work with
 export async function setHost(nodes) {
     return new Promise(function (resolve, reject) {
         Array.from(nodes).forEach(user => {

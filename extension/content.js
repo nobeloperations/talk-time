@@ -1,4 +1,5 @@
 window.onload = async function () {
+  //import all functions
   const { generateHTML, addTopicAndNotesItems, addTopicAndDashboardFlags, setOpenChatButton } = await import(chrome.runtime.getURL('./resources/html.js'))
   const { waitForElement, $el, dashboardAndTopicVisual, openTopicAndNotesModal, closeBadgesModal, openBadgesModal, sendBadge, createNote, closeNotesModal, closeTopicModal, setNewTopic, openChat, closeChat, openChatSpace, returnToMainChat, sendChatMessage, searchBadges } = await import(chrome.runtime.getURL('./resources/helper.functions.js'));
   const { setHost, setCurrentName } = await import(chrome.runtime.getURL('./resources/storage.functions.js'));
@@ -6,8 +7,11 @@ window.onload = async function () {
   const { addUserToChat, removeUserFromChat } = await import(chrome.runtime.getURL('./resources/chat.functions.js'));
   const { addUser } = await import(chrome.runtime.getURL('./resources/user.functions.js'));
   const { addMeeting } = await import(chrome.runtime.getURL('./resources/meeting.functions.js'));
-  let badgeModalWrapper, badges, badgeSearchInput, notesModal, topicModal, topicInput, modalShadow, listOfMessageUsers, openChatButton, optionsWrapper;
-
+  //declaring variables here to use that in all scope but assign values later
+  let badgeModalWrapper, badges, badgeSearchInput, newVersionModal, notesModal, topicModal, topicInput, modalShadow, listOfMessageUsers, openChatButton, optionsWrapper;
+  
+  //just some constants
+  const currentInstalledVersion = chrome.runtime.getManifest().version
   const parsed_URL = window.location.href.split('/').slice(-1).toString().slice(0, 12);
   const DASHBOARD_LINK = 'https://nobeltt.com/'
   const CHAT_LINK = 'https://adventurous-glorious-actor.glitch.me/stream-messages'
@@ -15,6 +19,7 @@ window.onload = async function () {
   const DATE = new Date().toISOString().split('T')[0]
   const body = document.querySelector('body');
 
+  //declarin event source (ws alternative) and handle every case of message
   const event_source = new EventSource(CHAT_LINK);
   event_source.onmessage = async (event) => {
     const message = JSON.parse(event.data);
@@ -30,6 +35,7 @@ window.onload = async function () {
 
   };
 
+  //main function that start up all processes after we have access to html elements
   (async () => {
     generateHTML(document.body)
   })()
@@ -42,8 +48,18 @@ window.onload = async function () {
       topicInput = document.querySelector('.topic-input')
       modalShadow = document.querySelector('.modal-shadow')
       listOfMessageUsers = document.querySelector('.message-list-wrapper')
+      newVersionModal = document.querySelector('.new-version-modal')
     })
     .then(() => {
+      //check if user`s version is the latest one
+      fetch(`${DASHBOARD_LINK}currentversion`)
+      .then(res => res.json())
+      .then(response => {
+        const latestVersion = response.version;
+        if(currentInstalledVersion !== latestVersion) newVersionModal.style.display = 'flex'
+      })
+
+      //every time user opens three dots menu, this function invokes (mutation observer is observe is element presented in html or not)
       let optionsObserver = new MutationObserver(async function (mutations) {
         for (mutation of mutations) {
           let [addedNodes] = mutation.addedNodes
@@ -52,6 +68,7 @@ window.onload = async function () {
             const addedWrapper = document.querySelector('.options-added-wrapper')
 
             if (optionsWrapper && !addedWrapper) {
+              //add note and topic list items to html
               addTopicAndNotesItems(optionsWrapper)
               const openNotes = await waitForElement('.note-wrapper')
               openNotes.onclick = () => { openTopicAndNotesModal(modalShadow, notesModal, optionsWrapper) }
@@ -64,6 +81,7 @@ window.onload = async function () {
 
       optionsObserver.observe(document.body, { attributes: false, childList: true, characterData: false, subtree: true });
 
+      //wait for users tab to be open and after that invokes many functions which is connected to user
       (async function () {
         const listOfUsers = await waitForElement('.GvcuGe');
         await setCurrentName(listOfUsers.children)
@@ -75,10 +93,12 @@ window.onload = async function () {
           })
         addUser(listOfUsers.children, parsed_URL, DATE, DASHBOARD_LINK);
         addUserToChat(listOfUsers.children)
-
+        
+        //wait for meeting name and add meeting
         const meetingName = (await waitForElement('.u6vdEc')).textContent.trim();
         addMeeting(meetingName, parsed_URL, DATE, DASHBOARD_LINK)
-
+        
+        //everytime when someone join the meet, we add it to db and to chat
         let usersListObserver = new MutationObserver(function (mutations) {
           mutations.forEach(function (mutation) {
             if (mutation.addedNodes.length) {
@@ -93,42 +113,50 @@ window.onload = async function () {
         usersListObserver.observe(listOfUsers, config);
       })();
 
+      //function that add small icons (left top corner) to html
       (async function () {
         const meetingName = (await waitForElement('.ouH3xe')).textContent;
         addTopicAndDashboardFlags(parsed_URL, DATE, meetingName)
       })();
 
+      //set up onclick for closing badges modal
       (async function () {
         const closeBadgeModal = (await waitForElement('.close-badges-modal'))
         closeBadgeModal.onclick = () => { closeBadgesModal(modalShadow, badgeModalWrapper, badgeSearchInput, badges) }
       })();
 
+      //function that can be used to close messages modal (don`t depend on a class of element)
       function closeMessageModal(e) {
         const modal = e.target.parentElement.parentElement;
         modalShadow.style.display = 'none'
         modal.style.display = 'none'
       }
 
+      //set up onlick for add note button
       (async function () {
         const createNoteButton = await waitForElement('.add-note')
         createNoteButton.onclick = () => { createNote(modalShadow, DASHBOARD_LINK, parsed_URL, DATE, notesModal) }
       })();
 
+      //set up onclick for close note modal
       (async function () {
         const closeNoteModalButton = await waitForElement('.cancel-note')
         closeNoteModalButton.onclick = () => { closeNotesModal(modalShadow, notesModal) }
       })();
 
+      //set up onclick for close topic modal
       (async function () {
         const closeTopicModalButton = await waitForElement('.close-topic-modal')
         closeTopicModalButton.onclick = () => { closeTopicModal(modalShadow, topicModal, topicInput) }
       })();
 
+      //set up onclick for set new topic button
       (async function () {
         const setNewTopicButton = await waitForElement('.set-topic')
         setNewTopicButton.onclick = () => { setNewTopic(topicInput, parsed_URL, DATE, modalShadow, topicModal) }
       })();
 
+      //set up onclick for dashboard link and current topic icons (left top corner)
       (async function() {
         const dashboardLink = await waitForElement('.dashboard-link-image')
         dashboardLink.onclick = () => {
@@ -142,27 +170,37 @@ window.onload = async function () {
           dashboardAndTopicVisual(dashboardLink, '.curr-topic', 100)
         }
       })();
-
+      
+      //set up onclick for button that opens chat
       (async function() {
         const openMessageListButton = (await waitForElement('.open-chat-button'));
         openMessageListButton.onclick = () => { openChat(listOfMessageUsers, openChatButton) }
       })();
 
+      //set up onclick for button that closes chat
       (async function() {
         const closeChatButton = (await waitForElement('.close-chat-button'))
         closeChatButton.onclick = () => { closeChat(listOfMessageUsers, openChatButton) }
       })();
 
+      //set up onclick for reply back to host button (when you received message from host)
       (async function replyToHost() {
         const replyButton = await waitForElement('.reply-button')
         replyButton.onclick = () => { sendMessageToHost(parsed_URL) }
       })();
 
+      //every time when user enter at least 1 symbol, we search badges by its needs
       (async function() {
         const searchBadgesInput = await waitForElement('.badge-search')
         searchBadgesInput.oninput = () => { searchBadges(searchBadgesInput, badges) }
       })();
 
+      (async function() {
+        const closeNewVersionModal = await waitForElement('.close-update')
+        closeNewVersionModal.onclick = () => { newVersionModal.style.display = 'none' }
+      })();
+
+      //every 10 seconds we update user`s percentage
       let percentageInterval = setInterval(() => {
         let talkTimeContainer = document.querySelector('#talk-time-container')
         if (talkTimeContainer) {
@@ -186,6 +224,7 @@ window.onload = async function () {
         }
       }, 10000)
 
+      //it is onclick for elements which count on page is >1, I can`t use querySelectorAll, so we just check if our click target is element with some class and invokes function
       body.onclick = function (e) {
         const options = {
           'close-message-alert': closeMessageModal,
@@ -653,38 +692,6 @@ window.onload = async function () {
         }
       }
 
-
-      // ==================================================================
-      // WELCOME MESSAGE
-      // ==================================================================
-      function welcome() {
-        let d = $el('div', { id: "talk-time-welcome" });
-        d.innerHTML = `
-      <h1 class="talk-time-welcome-title">Welcome to Talk Time!</h1>
-      <p>To enable the Talk Time display, turn on the Participants list while in a Meet.</p>
-      <div class="group-welcome-instructions">Click on the
-          <div class="talk-time-group-label welcome-groups-mark talk-time-group-selector-a">A</div>
-          <div class="talk-time-group-label welcome-groups-mark talk-time-group-selector-b">B</div>
-          <div class="talk-time-group-label welcome-groups-mark talk-time-group-selector-c">C</div>
-          <div class="talk-time-group-label welcome-groups-mark talk-time-group-selector-d">D</div>
-          grouping buttons to add participants to ad-hoc groups and total their time together. Click on the group labels
-          below to rename them.
-      </div>
-      <div class="site-link">For more, visit <a href="https://EveryoneShouldHaveAVoice.com" target="_blank">EveryoneShouldHaveAVoice.com</a>
-      </div>
-      <div class="warning-respect-text">Don't forget that everyone should have a voice and that every question should not go unanswered! Respect each other</div>
-      <div class="okay-wrapper">
-          <button id="talk-time-welcome-okay">Okay</button>
-      </div>
-      `;
-        document.body.appendChild(d);
-        document.querySelector('#talk-time-welcome-okay').addEventListener('click', () => {
-          options.welcome_dismissed = false;
-          chrome.storage.local.set({ "options": options });
-          d.style.display = "none";
-        });
-      }
-
       // Get options
       chrome.storage.local.get(['options'], function (storage) {
         options = storage.options;
@@ -693,9 +700,6 @@ window.onload = async function () {
             "welcome_dismissed": false
           };
           chrome.storage.local.set({ "options": options });
-        }
-        if (!options.welcome_dismissed) {
-          welcome()
         }
 
         setInterval(attach, 1000);

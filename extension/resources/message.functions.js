@@ -1,6 +1,7 @@
 const { host } = await new Promise(resolve => chrome.storage.local.get(['host'], resolve));
 const { current_name } = await new Promise(resolve => chrome.storage.local.get(['current_name'], resolve));
 
+//function that sends message to host (basically it invokes when you reply to host), cause if you`re not a host , you can`t send messages
 export async function sendMessageToHost(url) {
     const message = document.querySelector('.reply-input')
     if (!message.value.trim()) return;
@@ -16,6 +17,7 @@ export async function sendMessageToHost(url) {
         })
 }
 
+//function that ivokes when host receives the message
 export function messageToHost(message) {
     if (current_name === host) {
         const from = message.from.replaceAll(' ', '');
@@ -37,6 +39,7 @@ export function messageToHost(message) {
     }
 }
 
+//function that display message modal and fill message modal elements, when you receive message
 function setMessageContent(from, avatar, messageEl, messageModal, message, modalShadow) {
     from.innerHTML = message.from
     avatar.src = message.avatar;
@@ -44,7 +47,7 @@ function setMessageContent(from, avatar, messageEl, messageModal, message, modal
     messageModal.style.display = 'flex'
     modalShadow.style.display = 'flex'
 }
-
+//function that invoke setMessageContent and pass arguments to it (when you receive message from host)
 export function messageFromHost(message) {
     const messageElement = document.querySelector('.message')
     const modalShadow = document.querySelector('.modal-shadow')
@@ -54,7 +57,7 @@ export function messageFromHost(message) {
     if (message.to === current_name) { setMessageContent(messageFrom, messageAvatar, messageElement, messageModal, message, modalShadow) }
 }
 
-
+//function that invoke setMessageContent and pass arguments to it (when you receive badge)
 export function messageBadge(message, date, parsed_URL) {
     const badgesMessage = document.querySelector('.badges-message')
     const modalShadow = document.querySelector('.modal-shadow')
@@ -64,6 +67,7 @@ export function messageBadge(message, date, parsed_URL) {
     if (message.url === parsed_URL && message.date === date && current_name === message.to) setMessageContent(badgesFrom, badgesAvatar, badgesMessage, badgesMessageModal, message, modalShadow)
 }
 
+//function that invoke setMessageContent and pass arguments to it (when someone changes topic)
 export function messageTopic(message, date, parsed_URL) {
     const topicMessage = document.querySelector('.topic-message')
     const currTopic = document.querySelector('.curr-topic')

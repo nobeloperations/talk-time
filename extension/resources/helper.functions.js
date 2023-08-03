@@ -1,3 +1,4 @@
+// function that wait when element appears so app can work with it
 export async function waitForElement(selector) {
     while (true) {
         const element = document.querySelector(selector);
@@ -6,6 +7,7 @@ export async function waitForElement(selector) {
     }
 }
 
+// function that creates element (the same as document.createElement())
 export function $el(tag, props) {
     let p, el = document.createElement(tag);
     if (props) {
@@ -16,6 +18,7 @@ export function $el(tag, props) {
     return el;
 }
 
+//function that do a small visual effects when you want to go to dashboard or see current topic of the meet
 export function dashboardAndTopicVisual(el, selector, topValue) {
     const wrapper = document.querySelector(selector);
     const attr = el.dataset.active;
@@ -24,12 +27,14 @@ export function dashboardAndTopicVisual(el, selector, topValue) {
     wrapper.style.top = attr ? `-${topValue}px` : '0';
 }
 
+//just styles for topic and notes modal
 export function openTopicAndNotesModal(modalShadow, modal, optionsWrapper) {
     modalShadow.style.display = 'flex'
     modal.style.display = 'flex'
     optionsWrapper.style.display = 'none'
 }
 
+// function which close badges modal
 export function closeBadgesModal(modalShadow, badgeModalWrapper, badgeSearchInput, badges) {
     modalShadow.style.display = 'none'
     badgeModalWrapper.style.display = 'none'
@@ -39,6 +44,7 @@ export function closeBadgesModal(modalShadow, badgeModalWrapper, badgeSearchInpu
     })
 }
 
+// function that opens badges modal
 export function openBadgesModal(e, modalShadow, badgeModalWrapper) {
     const openBadgesModalButton = e.target;
     modalShadow.style.display = 'flex'
@@ -47,6 +53,7 @@ export function openBadgesModal(e, modalShadow, badgeModalWrapper) {
     chrome.storage.local.set({ "badge_name": attr })
 }
 
+// function that grab all needed data and make a request to create a new badge in db and sends a message to user that he or she received badge
 export async function sendBadge(e, modalShadow, LINK, url, date, badgeModalWrapper) {
     const sendBadgeButton = e.target;
     modalShadow.style.display = 'none';
@@ -75,7 +82,9 @@ export async function sendBadge(e, modalShadow, LINK, url, date, badgeModalWrapp
     badgeModalWrapper.style.display = 'none';
 }
 
-export function createNote(modalShadow, LINK, url, date, notesModal) {
+//function that creates new note
+export async function createNote(modalShadow, LINK, url, date, notesModal) {
+    const { current_name } = await new Promise(resolve => chrome.storage.local.get(['current_name'], resolve));
     modalShadow.style.display = 'none'
     let note = document.querySelector('.note')
     if (note.value) {
@@ -87,7 +96,8 @@ export function createNote(modalShadow, LINK, url, date, notesModal) {
             body: JSON.stringify({
                 text: note.value,
                 url,
-                tags: []
+                tags: [],
+                sender: current_name
             })
         })
             .then(() => {
@@ -96,6 +106,7 @@ export function createNote(modalShadow, LINK, url, date, notesModal) {
     }
 }
 
+//function that closes notes modal
 export function closeNotesModal(modalShadow, notesModal) {
     modalShadow.style.display = 'none'
     let noteInput = document.querySelector('.note')
@@ -103,12 +114,14 @@ export function closeNotesModal(modalShadow, notesModal) {
     noteInput.value = ''
 }
 
+//function that closes set new topic modal
 export function closeTopicModal(modalShadow, topicModal, topicInput) {
     modalShadow.style.display = 'none'
     topicModal.style.display = 'none'
     topicInput.value = ''
 }
 
+//function that sends message to all of participants that now we have a new topic of the meet
 export function setNewTopic(topicInput, url, date, modalShadow, topicModal) {
     const topicValue = topicInput.value;
     fetch('https://adventurous-glorious-actor.glitch.me/send-messages', {
@@ -122,6 +135,7 @@ export function setNewTopic(topicInput, url, date, modalShadow, topicModal) {
     topicInput.value = ''
 }
 
+//function that open chat and host(s) can choose whom to message
 export function openChat(listOfMessageUsers, openChatButton) {
     listOfMessageUsers.style.display = 'flex'
     openChatButton.style.display = 'none'
@@ -129,12 +143,13 @@ export function openChat(listOfMessageUsers, openChatButton) {
     messageIndicator.textContent = '0'
     messageIndicator.style.display = 'none'
 }
-
+//function that close chat
 export function closeChat(listOfMessageUsers, openChatButton) {
     listOfMessageUsers.style.display = 'none'
     openChatButton.style.display = 'flex'
 }
 
+//function that opens chat with certain user
 export function openChatSpace(e) {
     const openChatSpaceElement = e.target;
     const chatUser = openChatSpaceElement.closest('.chat-user')
@@ -156,6 +171,7 @@ export function openChatSpace(e) {
     chatSpaceWrapper.style.opacity = '1';
 }
 
+//function when user want to return from chat with certain user to list of users in chat
 export function returnToMainChat(e, openChatButton) {
     const returnToMainChatButton = e.target;
     const username = returnToMainChatButton.parentElement.querySelector('.chat-space-name').textContent.trim().replace(' ', '')
@@ -166,6 +182,7 @@ export function returnToMainChat(e, openChatButton) {
     openChatButton.style.display = 'flex'
 }
 
+//function that sends message from the host to participant of the meet
 export async function sendChatMessage(e, url) {
     const sendChatMessageButton = e.target;
     const message = sendChatMessageButton.previousElementSibling;
@@ -188,6 +205,7 @@ export async function sendChatMessage(e, url) {
         })
 }
 
+//search badges function
 export function searchBadges(searchBadgesInput, badges) {
     let value = searchBadgesInput.value.toLowerCase()
     badges.forEach(badge => {
