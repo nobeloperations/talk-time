@@ -18,6 +18,21 @@ export function $el(tag, props) {
     return el;
 }
 
+// function that works with countdown of window close on modals (when someone receive badge, when topic changed and modal when you reach limit of sent badges)
+export function startModalCountdown(modal, modalMessageElement, modalMessage, modalTimerSeconds) {
+    modal.style.transform = 'translate(-50%, 0)'
+    modalMessageElement.innerHTML = modalMessage
+    let n = 4;
+    const timerToClose = setInterval(() => {
+      modalTimerSeconds.innerHTML = n--;
+    }, 1000)
+    setTimeout(() => {
+        modal.style.transform = 'translate(-50%, -300%)'
+        clearInterval(timerToClose)
+        modalTimerSeconds.innerHTML = "5";
+    }, 5000)
+}
+
 //function that do a small visual effects when you want to go to dashboard or see current topic of the meet
 export function dashboardAndTopicVisual(el, selector, topValue) {
     const wrapper = document.querySelector(selector);
@@ -53,49 +68,55 @@ export function openBadgesModal(e, modalShadow, badgeModalWrapper) {
     chrome.storage.local.set({ "badge_name": attr })
 }
 
-// function that grab all needed data and make a request to create a new badge in db and sends a message to user that he or she received badge
-export async function sendBadge(e, modalShadow, LINK, url, date, badgeModalWrapper) {
+// function that grab all needed data and make a request to create a new badge in db and sends a message about received badge
+export async function sendBadge(e, modalShadow, DASHBOARD_LINK, MEET_CODE, DATE, badgeModalWrapper, badgesLimitAlert) {
     const sendBadgeButton = e.target;
     modalShadow.style.display = 'none';
-    const { current_name } = await new Promise(resolve => chrome.storage.local.get(['current_name'], resolve));
     const { badge_name } = await new Promise(resolve => chrome.storage.local.get(["badge_name"], resolve));
+    const { current_name } = await new Promise(resolve => chrome.storage.local.get(["current_name"], resolve));
     let badgeName = sendBadgeButton.previousElementSibling.querySelector('span').textContent;
-    let badgeImage = sendBadgeButton.previousElementSibling.querySelector('img').src
-
-    fetch(`${LINK}badges/givebadge/${url}/${badge_name}/${date}`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            badge: badgeName,
+    const badgeLimit = localStorage.getItem("badge_limit");
+    if(+badgeLimit) {
+        localStorage.setItem("badge_limit", badgeLimit - 1)
+        fetch(`${DASHBOARD_LINK}/badges/givebadge/${MEET_CODE}/${badge_name}/${DATE}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                badge: badgeName,
+            })
         })
-    })
-        .then(() => {
-            fetch('https://adventurous-glorious-actor.glitch.me/send-messages', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ from: 'New badge!', url, date, message: `You received ${badgeName} badge from ${current_name}!`, avatar: badgeImage, to: badge_name, type: "BADGE" })
+            .then(() => {
+                fetch('https://adventurous-glorious-actor.glitch.me/send-messages', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({message: `${badge_name} received ${badgeName} badge from ${current_name}`, url: MEET_CODE, date: DATE, type: "BADGE" })
+                });
             });
-        });
+    }
 
     badgeModalWrapper.style.display = 'none';
-}
+    const badgesLimitTimerSeconds = document.querySelector('.badges-limit-timer-seconds')
+    const badgesLimitMessage = document.querySelector('.badges-limit-message')
+    
+    if(!+badgeLimit) startModalCountdown(badgesLimitAlert, badgesLimitMessage, "You`ve reach the limit of sent badges for this meeting!", badgesLimitTimerSeconds)
+    }
 
 //function that creates new note
-export async function createNote(modalShadow, LINK, url, date, notesModal) {
+export async function createNote(modalShadow, DASHBOARD_LINK, MEET_CODE, DATE, notesModal) {
     const { current_name } = await new Promise(resolve => chrome.storage.local.get(['current_name'], resolve));
     modalShadow.style.display = 'none'
     let note = document.querySelector('.note')
     if (note.value) {
-        fetch(`${LINK}newconclusion/${url}/${date}`, {
+        fetch(`${DASHBOARD_LINK}/newconclusion/${MEET_CODE}/${DATE}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
                 text: note.value,
-                url,
+                url: MEET_CODE,
                 tags: [],
                 sender: current_name
             })
@@ -122,87 +143,15 @@ export function closeTopicModal(modalShadow, topicModal, topicInput) {
 }
 
 //function that sends message to all of participants that now we have a new topic of the meet
-export function setNewTopic(topicInput, url, date, modalShadow, topicModal) {
+export function setNewTopic(topicInput, MEET_CODE, DATE, modalShadow, topicModal) {
     const topicValue = topicInput.value;
     fetch('https://adventurous-glorious-actor.glitch.me/send-messages', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ from: "New topic!", url, date, message: `Current topic of the meeting: ${topicValue}`, avatar: 'https://cdn-icons-png.flaticon.com/128/9227/9227001.png', to: 'everyone', type: "TOPIC" })
+        body: JSON.stringify({ url: MEET_CODE, date: DATE, message: `New topic of the meeting: ${topicValue}`, type: "TOPIC" })
     })
 
-    modalShadow.style.display = 'none'
-    topicModal.style.display = 'none'
-    topicInput.value = ''
-}
-
-//function that open chat and host(s) can choose whom to message
-export function openChat(listOfMessageUsers, openChatButton) {
-    listOfMessageUsers.style.display = 'flex'
-    openChatButton.style.display = 'none'
-    const messageIndicator = document.querySelector('.message-indicator')
-    messageIndicator.textContent = '0'
-    messageIndicator.style.display = 'none'
-}
-//function that close chat
-export function closeChat(listOfMessageUsers, openChatButton) {
-    listOfMessageUsers.style.display = 'none'
-    openChatButton.style.display = 'flex'
-}
-
-//function that opens chat with certain user
-export function openChatSpace(e) {
-    const openChatSpaceElement = e.target;
-    const chatUser = openChatSpaceElement.closest('.chat-user')
-    let username = chatUser.querySelector('.chat-user-name').textContent;
-    let avatar = chatUser.querySelector('.chat-user-avatar').src;
-
-    const newMessageText = chatUser.querySelector('.chat-user-new-message');
-    newMessageText.style.display = 'none';
-
-    const chatSpaceWrapper = document.querySelector(`.chat-space-wrapper[data-username="${username.replace(' ', '')}"]`);
-    const chatSpace = chatSpaceWrapper.querySelector('.chat-space');
-    const chatSpaceUsername = chatSpaceWrapper.querySelector('.chat-space-name');
-    const chatSpaceAvatar = chatSpaceWrapper.querySelector('.chat-space-avatar');
-
-    chatSpaceAvatar.src = avatar;
-    chatSpaceUsername.innerHTML = username;
-    chatSpace.style.display = 'flex';
-    chatSpaceWrapper.style.visibility = 'visible';
-    chatSpaceWrapper.style.opacity = '1';
-}
-
-//function when user want to return from chat with certain user to list of users in chat
-export function returnToMainChat(e, openChatButton) {
-    const returnToMainChatButton = e.target;
-    const username = returnToMainChatButton.parentElement.querySelector('.chat-space-name').textContent.trim().replace(' ', '')
-    const chatSpace = document.querySelector(`.chat-space-wrapper[data-username="${username}"`)
-    chatSpace.style.visibility = 'hidden'
-    chatSpace.style.opacity = '0'
-    document.querySelector('.message-list-wrapper').style.display = 'flex'
-    openChatButton.style.display = 'flex'
-}
-
-//function that sends message from the host to participant of the meet
-export async function sendChatMessage(e, url) {
-    const sendChatMessageButton = e.target;
-    const message = sendChatMessageButton.previousElementSibling;
-    const chatSpace = sendChatMessageButton.parentElement.previousElementSibling;
-    if (!message.value) return
-    const messageElement = document.createElement('div')
-    messageElement.className = 'sended-message'
-    messageElement.innerHTML = message.value
-    chatSpace.appendChild(messageElement)
-    const to = message.parentElement.previousElementSibling.previousElementSibling.querySelector('.chat-space-name').textContent;
-    const { host } = await new Promise(resolve => chrome.storage.local.get(["host"], resolve));
-
-    fetch('https://adventurous-glorious-actor.glitch.me/send-messages', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ from: host, url, message: message.value, to, type: "MESSAGE_FROM_HOST", avatar: 'https://cdn-icons-png.flaticon.com/128/1144/1144760.png' })
-    })
-        .then(() => {
-            message.value = ''
-        })
+    closeTopicModal(modalShadow, topicModal, topicInput)
 }
 
 //search badges function
@@ -213,4 +162,14 @@ export function searchBadges(searchBadgesInput, badges) {
         if (!badgeName.textContent.toLowerCase().includes(value) && value) badge.style.display = 'none'
         else badge.style.display = 'flex'
     })
+}
+
+export function openWelcomeModal(welcomeModal, modalShadow) {
+    modalShadow.style.display = 'flex'
+    welcomeModal.style.display = 'flex'
+}
+
+export function closeWelcomeModal(welcomeModal, modalShadow) {
+    modalShadow.style.display = 'none'
+    welcomeModal.style.display = 'none'
 }

@@ -1,34 +1,39 @@
 window.onload = async function () {
   //import all functions
-  const { generateHTML, addTopicAndNotesItems, addTopicAndDashboardFlags, setOpenChatButton } = await import(chrome.runtime.getURL('./resources/html.js'))
-  const { waitForElement, $el, dashboardAndTopicVisual, openTopicAndNotesModal, closeBadgesModal, openBadgesModal, sendBadge, createNote, closeNotesModal, closeTopicModal, setNewTopic, openChat, closeChat, openChatSpace, returnToMainChat, sendChatMessage, searchBadges } = await import(chrome.runtime.getURL('./resources/helper.functions.js'));
+  const { generateHTML, addTopicAndNotesItems, addTopicAndDashboardFlags, createOpenChatButton, createWelcomeModal } = await import(chrome.runtime.getURL('./resources/html.functions.js'))
+  const { waitForElement, $el, dashboardAndTopicVisual, openTopicAndNotesModal, closeBadgesModal, openBadgesModal, sendBadge, createNote, closeNotesModal, closeTopicModal, setNewTopic, searchBadges, openWelcomeModal, closeWelcomeModal } = await import(chrome.runtime.getURL('./resources/helper.functions.js'));
   const { setHost, setCurrentName } = await import(chrome.runtime.getURL('./resources/storage.functions.js'));
-  const { sendMessageToHost, messageToHost, messageFromHost, messageBadge, messageTopic } = await import(chrome.runtime.getURL('./resources/message.functions.js'));
-  const { addUserToChat, removeUserFromChat } = await import(chrome.runtime.getURL('./resources/chat.functions.js'));
+  const { replyToHost, receiveMessageFromParticipant, receiveMessageFromHost, receiveBadgeMessage, receiveTopicMessage, closeMessageModal } = await import(chrome.runtime.getURL('./resources/message.functions.js'));
+  const { addUserToChat, removeUserFromChat, openChat, closeChat, openChatSpace, returnToMainChat, sendChatMessage } = await import(chrome.runtime.getURL('./resources/chat.functions.js'));
   const { addUser } = await import(chrome.runtime.getURL('./resources/user.functions.js'));
   const { addMeeting } = await import(chrome.runtime.getURL('./resources/meeting.functions.js'));
+  const { DASHBOARD_LINK, DATE, CHAT_LINK, CURRENT_VERSION, MEET_CODE } = await import(chrome.runtime.getURL("./resources/env.js"))
+  const welcomeBackground = chrome.runtime.getURL('./resources/welcome.png')
   //declaring variables here to use that in all scope but assign values later
-  let badgeModalWrapper, badges, badgeSearchInput, newVersionModal, notesModal, topicModal, topicInput, modalShadow, listOfMessageUsers, openChatButton, optionsWrapper;
+  let badgeModalWrapper, badges, badgeSearchInput, newVersionModal, notesModal, topicModal, topicInput, modalShadow, listOfMessageUsers, openChatButton, optionsWrapper, welcomeModal, badgesLimitAlert;
   
-  //just some constants
-  const currentInstalledVersion = chrome.runtime.getManifest().version
-  const parsed_URL = window.location.href.split('/').slice(-1).toString().slice(0, 12);
-  const DASHBOARD_LINK = 'https://nobeltt.com/'
-  const CHAT_LINK = 'https://adventurous-glorious-actor.glitch.me/stream-messages'
-  // const DASHBOARD_LINK = 'http://localhost:3001/'
-  const DATE = new Date().toISOString().split('T')[0]
-  const body = document.querySelector('body');
+  //set limit for badges per meeting
+  localStorage.setItem("badge_limit", 5)
 
-  //declarin event source (ws alternative) and handle every case of message
+  const body = document.querySelector('body');
+  let VALID_LINK = false;
+
+  //checking if this meeting is in nobel db
+  fetch(`${DASHBOARD_LINK}/checkevent/${MEET_CODE}`)
+  .then(res => res.json())
+  .then(response => { VALID_LINK = !!response })
+  
+
+  //declaring event source (ws alternative) and handle every case of message
   const event_source = new EventSource(CHAT_LINK);
   event_source.onmessage = async (event) => {
     const message = JSON.parse(event.data);
 
     const messageFunctions = {
-      'BADGE': () => { messageBadge(message, DATE, parsed_URL) },
-      'TOPIC': () => { messageTopic(message, DATE, parsed_URL) },
-      'MESSAGE_FROM_HOST': () => { messageFromHost(message) },
-      'MESSAGE_TO_HOST': () => { messageToHost(message) }
+      'BADGE': () => { receiveBadgeMessage(message, DATE, MEET_CODE) },
+      'TOPIC': () => { receiveTopicMessage(message, DATE, MEET_CODE) },
+      'MESSAGE_FROM_HOST': () => { receiveMessageFromHost(message) },
+      'MESSAGE_TO_HOST': () => { receiveMessageFromParticipant(message) }
     }
 
     messageFunctions[message.type]()
@@ -49,15 +54,24 @@ window.onload = async function () {
       modalShadow = document.querySelector('.modal-shadow')
       listOfMessageUsers = document.querySelector('.message-list-wrapper')
       newVersionModal = document.querySelector('.new-version-modal')
+      badgesLimitAlert = document.querySelector('.badges-limit-alert')
     })
     .then(() => {
+
+      // create welcome window
+      createWelcomeModal()
+        .then(() => {
+          welcomeModal = document.querySelector('.welcome-modal')
+          welcomeModal.style.backgroundImage = `url('${welcomeBackground}')`;
+        })
+
       //check if user`s version is the latest one
-      fetch(`${DASHBOARD_LINK}currentversion`)
-      .then(res => res.json())
-      .then(response => {
-        const latestVersion = response.version;
-        if(currentInstalledVersion !== latestVersion) newVersionModal.style.display = 'flex'
-      })
+      fetch(`${DASHBOARD_LINK}/currentversion`)
+        .then(res => res.json())
+        .then(response => {
+          const latestVersion = response.version;
+          if (CURRENT_VERSION !== latestVersion) newVersionModal.style.display = 'flex'
+        })
 
       //every time user opens three dots menu, this function invokes (mutation observer is observe is element presented in html or not)
       let optionsObserver = new MutationObserver(async function (mutations) {
@@ -84,28 +98,28 @@ window.onload = async function () {
       //wait for users tab to be open and after that invokes many functions which is connected to user
       (async function () {
         const listOfUsers = await waitForElement('.GvcuGe');
-        await setCurrentName(listOfUsers.children)
-        await setHost(listOfUsers.children)
-        await setOpenChatButton()
+        await setCurrentName(listOfUsers.children) // store name of every user in talk time memory
+        await setHost(listOfUsers.children) //get and set meeting`s host name
+        await createOpenChatButton() // create button that opens chat
           .then(() => {
             openChatButton = document.querySelector('.open-chat-button')
             openChatButton.style.display = 'flex'
           })
-        addUser(listOfUsers.children, parsed_URL, DATE, DASHBOARD_LINK);
-        addUserToChat(listOfUsers.children)
-        
+        addUser(listOfUsers.children, MEET_CODE, DATE, DASHBOARD_LINK); // add user to database
+        addUserToChat(listOfUsers.children) // add user tab to chat
+
         //wait for meeting name and add meeting
         const meetingName = (await waitForElement('.u6vdEc')).textContent.trim();
-        addMeeting(meetingName, parsed_URL, DATE, DASHBOARD_LINK)
-        
+        addMeeting(meetingName, MEET_CODE, DATE, DASHBOARD_LINK)
+
         //everytime when someone join the meet, we add it to db and to chat
         let usersListObserver = new MutationObserver(function (mutations) {
           mutations.forEach(function (mutation) {
             if (mutation.addedNodes.length) {
-              addUser(mutation.addedNodes, parsed_URL, DATE, DASHBOARD_LINK);
+              addUser(mutation.addedNodes, MEET_CODE, DATE, DASHBOARD_LINK);
               addUserToChat(mutation.addedNodes)
             }
-            else if (mutation.removedNodes.length) removeUserFromChat(mutation)
+            else if (mutation.removedNodes.length) removeUserFromChat(mutation) // if user left meeting , we remove it from chat
           });
         });
 
@@ -116,26 +130,13 @@ window.onload = async function () {
       //function that add small icons (left top corner) to html
       (async function () {
         const meetingName = (await waitForElement('.ouH3xe')).textContent;
-        addTopicAndDashboardFlags(parsed_URL, DATE, meetingName)
+        addTopicAndDashboardFlags(MEET_CODE, DATE, meetingName)
       })();
-
-      //set up onclick for closing badges modal
-      (async function () {
-        const closeBadgeModal = (await waitForElement('.close-badges-modal'))
-        closeBadgeModal.onclick = () => { closeBadgesModal(modalShadow, badgeModalWrapper, badgeSearchInput, badges) }
-      })();
-
-      //function that can be used to close messages modal (don`t depend on a class of element)
-      function closeMessageModal(e) {
-        const modal = e.target.parentElement.parentElement;
-        modalShadow.style.display = 'none'
-        modal.style.display = 'none'
-      }
 
       //set up onlick for add note button
       (async function () {
         const createNoteButton = await waitForElement('.add-note')
-        createNoteButton.onclick = () => { createNote(modalShadow, DASHBOARD_LINK, parsed_URL, DATE, notesModal) }
+        createNoteButton.onclick = () => { createNote(modalShadow, DASHBOARD_LINK, MEET_CODE, DATE, notesModal) }
       })();
 
       //set up onclick for close note modal
@@ -153,72 +154,81 @@ window.onload = async function () {
       //set up onclick for set new topic button
       (async function () {
         const setNewTopicButton = await waitForElement('.set-topic')
-        setNewTopicButton.onclick = () => { setNewTopic(topicInput, parsed_URL, DATE, modalShadow, topicModal) }
+        setNewTopicButton.onclick = () => { setNewTopic(topicInput, MEET_CODE, DATE, modalShadow, topicModal) }
       })();
 
       //set up onclick for dashboard link and current topic icons (left top corner)
-      (async function() {
+      (async function () {
         const dashboardLink = await waitForElement('.dashboard-link-image')
         dashboardLink.onclick = () => {
           dashboardAndTopicVisual(dashboardLink, '.dashboard-link', 90)
         }
       })();
 
-      (async function() {
+      (async function () {
         const dashboardLink = await waitForElement('.curr-topic-image')
         dashboardLink.onclick = () => {
           dashboardAndTopicVisual(dashboardLink, '.curr-topic', 100)
         }
       })();
-      
+
       //set up onclick for button that opens chat
-      (async function() {
+      (async function () {
         const openMessageListButton = (await waitForElement('.open-chat-button'));
         openMessageListButton.onclick = () => { openChat(listOfMessageUsers, openChatButton) }
       })();
 
       //set up onclick for button that closes chat
-      (async function() {
+      (async function () {
         const closeChatButton = (await waitForElement('.close-chat-button'))
         closeChatButton.onclick = () => { closeChat(listOfMessageUsers, openChatButton) }
       })();
 
+      (async function () {
+        const closeBadgeModal = (await waitForElement('.close-badges-modal'))
+        closeBadgeModal.onclick = () => { closeBadgesModal(modalShadow, badgeModalWrapper, badgeSearchInput, badges) }
+      })();
+
       //set up onclick for reply back to host button (when you received message from host)
-      (async function replyToHost() {
+      (async function () {
         const replyButton = await waitForElement('.reply-button')
-        replyButton.onclick = () => { sendMessageToHost(parsed_URL) }
+        replyButton.onclick = () => { replyToHost(MEET_CODE) }
       })();
 
       //every time when user enter at least 1 symbol, we search badges by its needs
-      (async function() {
+      (async function () {
         const searchBadgesInput = await waitForElement('.badge-search')
         searchBadgesInput.oninput = () => { searchBadges(searchBadgesInput, badges) }
       })();
 
-      (async function() {
+      (async function () {
         const closeNewVersionModal = await waitForElement('.close-update')
         closeNewVersionModal.onclick = () => { newVersionModal.style.display = 'none' }
       })();
 
+      (async function () {
+        const closeWelcomeElement = await waitForElement('.close-welcome')
+        closeWelcomeElement.onclick = () => { closeWelcomeModal(welcomeModal, modalShadow) }
+      })();
+
       //every 10 seconds we update user`s percentage
-      let percentageInterval = setInterval(() => {
+      setInterval(() => {
         let talkTimeContainer = document.querySelector('#talk-time-container')
         if (talkTimeContainer) {
-          let percentages = document.querySelectorAll('.talk-time-table > tr')
-          let percentObject = {}
-          percentages.forEach(percentage => {
+          let percentagesElements = document.querySelectorAll('.talk-time-table > tr')
+          let percentages = []
+          percentagesElements.forEach(percentage => {
             let name = percentage.querySelector('.talk-time-name').textContent
             let percent = percentage.querySelector('.talk-time-pct').textContent
-            percentObject.name = name;
-            percentObject.percent = percent;
+            percentages.push({name, percent})
           })
-          fetch(`${DASHBOARD_LINK}percentage/${parsed_URL}/${DATE}`, {
+          fetch(`${DASHBOARD_LINK}/percentage/${MEET_CODE}/${DATE}`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-              percents: percentObject
+              percents: percentages
             })
           })
         }
@@ -227,18 +237,19 @@ window.onload = async function () {
       //it is onclick for elements which count on page is >1, I can`t use querySelectorAll, so we just check if our click target is element with some class and invokes function
       body.onclick = function (e) {
         const options = {
-          'close-message-alert': closeMessageModal,
-          'close-badges-alert': closeMessageModal,
-          'close-topic-alert': closeMessageModal,
+          'close-message-alert': () => { closeMessageModal(e) },
+          'close-badges-alert': () => { closeMessageModal(e) },
+          'close-topic-alert': () => { closeMessageModal(e) },
           'open-badges-modal': () => { openBadgesModal(e, modalShadow, badgeModalWrapper) },
-          'send-badge': () => { sendBadge(e, modalShadow, DASHBOARD_LINK, parsed_URL, DATE, badgeModalWrapper) },
-          'chat-user-avatar': openChatSpace,
-          'chat-user-name': openChatSpace,
-          'chat-user': openChatSpace,
-          'chat-space-button': () => { sendChatMessage(e, parsed_URL) },
-          'chat-space-arrow-back': () => { returnToMainChat(e, openChatButton) }
+          'send-badge': () => { sendBadge(e, modalShadow, DASHBOARD_LINK, MEET_CODE, DATE, badgeModalWrapper, badgesLimitAlert)},
+          'chat-user-avatar': () => { closeMessageModal(e) },
+          'chat-user-name': () => { closeMessageModal(e) },
+          'chat-user': () => { closeMessageModal(e) },
+          'chat-space-button': () => { sendChatMessage(e, MEET_CODE) },
+          'chat-space-arrow-back': () => { returnToMainChat(e, openChatButton) },
+          'open-welcome': () => { openWelcomeModal(welcomeModal, modalShadow) },
         }
-        options?.[e.target.className]?.(e)
+        options?.[e.target.className]?.()
       }
 
       // Default config
@@ -316,6 +327,7 @@ window.onload = async function () {
         dom_container.innerHTML = `
         <div class="talk-time-top" title="Click to collapse/expand">
           <img class="talk-time-logo" style=" filter: grayscale(1) invert(1);" src="https://cdn-icons-png.flaticon.com/24/1827/1827379.png" />
+          <img class="open-welcome" src="https://cdn-icons-png.flaticon.com/128/471/471715.png"/>
         </div>
         <div class="talk-time-header">
           <div class="talk-time-summary">Total Talk Time: <span id="talk-time-summary-total"></span></div>
@@ -331,7 +343,9 @@ window.onload = async function () {
         let onclick = function (selector, f) {
           dom_container.querySelector(selector).addEventListener('click', f);
         };
-        onclick('.talk-time-top', () => { dom_container.classList.toggle("collapsed"); });
+        onclick('.talk-time-top', (e) => {
+          if (e.target.className !== 'open-welcome') dom_container.classList.toggle('collapsed')
+        });
       }
 
       // Create the group rendering table
@@ -361,8 +375,9 @@ window.onload = async function () {
             <td class="talk-time-name">${record.name}</td>
             <td class="talk-time-time">0:00</td>
             <td class="talk-time-pct unique_pct_selector">0%</td>
-            <button class="open-badges-modal">Give Badge</button>
+            ${VALID_LINK ? '<button class="open-badges-modal">Give Badge</button>' : ''}
             <td class="talk-time-groups">${createParticipantRowGroups(record)}</td>
+            
           `;
         record.row = row;
         record.time_display = row.querySelector('.talk-time-time');
@@ -604,14 +619,16 @@ window.onload = async function () {
             });
           }
 
-          chrome.storage.local.get(['current_name'], function (storage) {
-            let allTr = document.querySelectorAll('.talk-time-table > tr')
-            allTr.forEach(tr => {
-              if (tr.dataset.name === storage.current_name) {
-                tr.querySelector('.open-badges-modal').disabled = true
-              }
+          if(VALID_LINK) {
+            chrome.storage.local.get(['current_name'], function (storage) {
+              let allTr = document.querySelectorAll('.talk-time-table > tr')
+              allTr.forEach(tr => {
+                if (tr.dataset.name === storage.current_name) {
+                  // tr.querySelector('.open-badges-modal').disabled = true
+                }
+              })
             })
-          })
+          }
 
           mutations.forEach(function (mutation) {
             let el = mutation.target;

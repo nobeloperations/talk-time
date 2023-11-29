@@ -3,121 +3,101 @@ function createBadgesModal(body) {
     let modal = document.createElement('div');
     modal.className = 'badge-modal-wrapper'
     modal.innerHTML = `
-    <div class="badge-modal-header">
-    <input type="text" placeholder="Search" class="badge-search" />
-    <button class="close-badges-modal">╳</button>
-  </div>
-  <div class="badge-modal">
-    <div class="badge-item" data-badge="be_present">
+    <div class="badge-modal">
+    <input type="text" placeholder="Search badges" class="badge-search">
+      <div class="badge-item" data-badge="be_present">
         <div class="span-wrapper">
-            <img src="https://nobeltt.com/img/be_present.png" />
-            <span>Be Present</span>
+          <img src="https://nobeltt.com/img/be_present.png" />
+          <span>Be Present</span>
         </div>
-        <button class="send-badge">Send</button>
-    </div>
-    <div class="badge-item" data-badge="bee_brief">
+        <button class="send-badge">Give upvote on a badge</button>
+      </div>
+      <div class="badge-item" data-badge="bee_brief">
         <div class="span-wrapper">
-            <img src="https://nobeltt.com/img/bee_brief.png" />
-            <span>Bee Brief</span>
+          <img src="https://nobeltt.com/img/bee_brief.png" />
+          <span>Bee Brief</span>
         </div>
-        <button class="send-badge">Send</button>
-    </div>
-    <div class="badge-item" data-badge="fun">
+        <button class="send-badge">Give upvote on a badge</button>
+      </div>
+      <div class="badge-item" data-badge="fun">
         <div class="span-wrapper">
-            <img src="https://nobeltt.com/img/fun.png" />
-            <span>Fun</span>
+          <img src="https://nobeltt.com/img/fun.png" />
+          <span>Fun</span>
         </div>
-        <button class="send-badge">Send</button>
-    </div>
-    <div class="badge-item" data-badge="encourage">
+        <button class="send-badge">Give upvote on a badge</button>
+      </div>
+      <div class="badge-item" data-badge="encourage">
         <div class="span-wrapper">
-            <img src="https://nobeltt.com/img/encourage.png" />
-            <span>Encourage</span>
+          <img src="https://nobeltt.com/img/encourage.png" />
+          <span>Encourage</span>
         </div>
-        <button class="send-badge">Send</button>
-    </div>
-    <div class="badge-item" data-badge="on_time">
+        <button class="send-badge">Give upvote on a badge</button>
+      </div>
+      <div class="badge-item" data-badge="on_time">
         <div class="span-wrapper">
-            <img src="https://nobeltt.com/img/on_time.png" />
-            <span>On Time</span>
+          <img src="https://nobeltt.com/img/on_time.png" />
+          <span>On Time</span>
         </div>
-        <button class="send-badge">Send</button>
-    </div>
-    <div class="badge-item" data-badge="help">
+        <button class="send-badge">Give upvote on a badge</button>
+      </div>
+      <div class="badge-item" data-badge="help">
         <div class="span-wrapper">
-            <img src="https://nobeltt.com/img/help.png" />
-            <span>Help</span>
+          <img src="https://nobeltt.com/img/help.png" />
+          <span>Help</span>
         </div>
-        <button class="send-badge">Send</button>
-    </div>
-    <div class="badge-item" data-badge="zen_enviroment">
+        <button class="send-badge">Give upvote on a badge</button>
+      </div>
+      <div class="badge-item" data-badge="zen_enviroment">
         <div class="span-wrapper">
-            <img src="https://nobeltt.com/img/zen_enviroment.png" />
-            <span>Zen Enviroment</span>
+          <img src="https://nobeltt.com/img/zen_enviroment.png" />
+          <span>Zen Enviroment</span>
         </div>
-        <button class="send-badge">Send</button>
+        <button class="send-badge">Give upvote on a badge</button>
+      </div>
     </div>
-  </div>
+    <hr>
+    <button class="close-badges-modal">Cancel</button>
       `
     modal.style.display = 'none'
     body.appendChild(modal)
 }
 
-//function that creates three modals, they are displayed when you received a message, topic changed or you recived new badge
-function createMessageModals(body) {
+
+function createReplyToMessageModal(body) {
     let messageModal = document.createElement('div')
     messageModal.className = 'message-alert'
-    messageModal.style.display = 'none'
     messageModal.innerHTML = `
-    <div class="message-wrapper">
-    <div class="message-content">
-        <img class="message-avatar"></img>
-        <div class="message-text-wrapper">
-            <span class="message-from"></span><br />
-            <span class="message"></span>
-        </div>
+    <div class="message-sender-wrapper">
+      <img src="" alt="" class="message-avatar">
+      <span class="message-from"></span>
     </div>
-    <span class="close-message-alert">×</span>
-    </div>
+    <span class="message"></span>
     <div class="reply-wrapper">
-        <input placeholder="Reply" type="text" class="reply-input">
-        <button class="reply-button">send</button>
+      <input type="text" class="reply-input" placeholder="Reply">
+      <button class="reply-button">Reply</button>
     </div>
-    `
-    let topicMessageModal = document.createElement('div')
-    topicMessageModal.className = 'topic-alert'
-    topicMessageModal.style.display = 'none'
-    topicMessageModal.innerHTML = `
-    <div class="topic-message-wrapper">
-    <div class="topic-message-content">
-        <img class="topic-avatar"></img>
-        <div class="topic-text-wrapper">
-            <span class="topic-from">Topic Change</span><br />
-            <span class="topic-message"></span>
-        </div>
-    </div>
-    <span class="close-topic-alert">×</span>
-    </div>
+    <div class="close-message-alert">Okay</div>
     `
 
-    let badgeMessageModal = document.createElement('div')
-    badgeMessageModal.className = 'badges-alert'
-    badgeMessageModal.style.display = 'none'
-    badgeMessageModal.innerHTML = `
-    <div class="badges-message-wrapper">
-    <div class="badges-message-content">
-        <img class="badges-avatar"></img>
-        <div class="badges-text-wrapper">
-            <span class="badges-from"></span><br />
-            <span class="badges-message"></span>
-        </div>
-    </div>
-    <span class="close-badges-alert">×</span>
-    </div>
-    `
     body.appendChild(messageModal)
-    body.appendChild(badgeMessageModal)
-    body.appendChild(topicMessageModal)
+
+}
+
+function createAlert(body, className, messageClass, timerClass) {
+  let alert = document.createElement('div')
+  alert.className = className
+  alert.innerHTML = `
+    <span class="${messageClass}"></span>
+    <span class="dissaper-timer">This message will dissapear in <b class="${timerClass}">5<b/>
+  `
+
+  body.appendChild(alert)
+}
+
+function createAlerts(body) {
+  createAlert(body, 'topic-alert', 'topic-message', 'topic-timer-seconds');
+  createAlert(body, 'badges-alert', 'badges-message', 'badges-timer-seconds');
+  createAlert(body, 'badges-limit-alert', 'badges-limit-message', 'badges-limit-timer-seconds');
 }
 
 //function that creates notes modal template
@@ -234,9 +214,10 @@ export function generateHTML(body) {
     createTopicModal(body)
     createShadowModal(body)
     createNotesModal(body)
-    createMessageModals(body)
+    createReplyToMessageModal(body)
     createBadgesModal(body)
     createNewVersionModal(body)
+    createAlerts(body)
 }
 
 //function that add add note and notes items to three dots menu
@@ -249,13 +230,13 @@ export function addTopicAndNotesItems(optionsWrapper) {
 }
 
 //function that creates current topic and dashboard link items (in top left corner)
-export function addTopicAndDashboardFlags(url, date, meetingName) {
+export function addTopicAndDashboardFlags(MEET_CODE, DATE, meetingName) {
 
     let dashboardLink = document.createElement('div');
     dashboardLink.className = 'dashboard-link-wrapper';
     dashboardLink.innerHTML = `
       <img class="dashboard-link-image" data-linkactive="" src="https://cdn-icons-png.flaticon.com/128/4050/4050374.png"/>
-      <a class="dashboard-link" href="https://nobeltt.com/dashboard/${url}/${date}?q=${meetingName}">Visit dashboard</a>
+      <a class="dashboard-link" href="https://nobeltt.com/dashboard/${MEET_CODE}/${DATE}?q=${meetingName}">Visit dashboard</a>
     `;
     document.body.appendChild(dashboardLink);
 
@@ -269,16 +250,31 @@ export function addTopicAndDashboardFlags(url, date, meetingName) {
 }
 
 //function that creates open chat button (in bottom left corner)
-export async function setOpenChatButton() {
+export async function createOpenChatButton() {
     const { current_name } = await new Promise(resolve => chrome.storage.local.get(['current_name'], resolve));
     const { host } = await new Promise(resolve => chrome.storage.local.get(['host'], resolve));
     if ((current_name && host) && current_name === host) {
-      const openChat = document.createElement('div')
-      openChat.className = 'open-chat-button'
-      openChat.innerHTML = `
+        const openChat = document.createElement('div')
+        openChat.className = 'open-chat-button'
+        openChat.innerHTML = `
               <span class="open-chat-span">Chat</span>
               <div class="message-indicator">0</div>
             `
-      document.body.appendChild(openChat)
+        document.body.appendChild(openChat)
     }
+}
+
+  export async function createWelcomeModal() {
+    const welcomeWindow = document.createElement('div')
+    welcomeWindow.className = 'welcome-modal'
+    welcomeWindow.innerHTML = `
+        <h1 class="welcome-title">Welcome to Talk Time!</h1>
+        <ul class="welcome-list">
+            <li>Make sure that your language in chrome is english</li>
+            <li>Don't forget to open users tab before using talk time</li>
+            <li>You'll be provided with link to dashboard of the meeting</li>
+        </ul>
+        <button class="close-welcome">Okay</button>
+    `
+    document.body.appendChild(welcomeWindow)
   }

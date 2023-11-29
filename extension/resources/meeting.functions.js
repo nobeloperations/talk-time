@@ -1,16 +1,15 @@
-
 //function that addes current meeting into database
-export async function addMeeting(meetingName, url, date, LINK) {
+export async function addMeeting(meetingName, MEET_CODE, DATE, DASHBOARD_LINK) {
     if (meetingName !== 'Ready to join?' && meetingName !== '' && meetingName !== 'Meeting details') {
-        await fetch(`${LINK}main/addmeeting`, {
+        await fetch(`${DASHBOARD_LINK}/main/addmeeting`, {
             method: "POST",
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
                 name: meetingName,
-                url,
-                date
+                url: MEET_CODE,
+                date: DATE
             })
         });
     }
