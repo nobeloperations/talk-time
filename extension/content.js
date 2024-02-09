@@ -654,7 +654,7 @@ window.onload = async function () {
             let allTr = document.querySelectorAll('.talk-time-table > tr')
             allTr.forEach(tr => {
               if (tr.dataset.name === storage.current_name) {
-                // tr.querySelector('.open-badges-modal').disabled = true
+                tr.querySelector('.open-badges-modal').disabled = true
               }
             })
           })
