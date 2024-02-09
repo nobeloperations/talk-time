@@ -2,17 +2,17 @@ const { current_name } = await new Promise(resolve => chrome.storage.local.get([
 
 // adding user to chat list , so host can see and message 
 function createChatUser(user, username) {
-    const emptyListElement = document.querySelector('.empty-messages-list')
+    const emptyListElement = document.querySelector('.empty-chat')
     const avatar = user.querySelector('.KjWwNd').src
-    const usersList = document.querySelector('.message-list')
+    const usersList = document.querySelector('.chat-participants')
     const userElement = document.createElement('div')
-    userElement.className = 'chat-user'
+    userElement.className = 'chat-participant'
     userElement.dataset.chatname = username.replaceAll(' ', '')
     userElement.innerHTML = `
-      <img class="chat-user-avatar" src=${avatar} />
-      <div class="chat-user-info">
-        <span class="chat-user-name">${username}</span>
-        <span class="chat-user-new-message">New message</span>
+      <img class="chat-participant-avatar" src=${avatar} />
+      <div class="chat-participant-info">
+        <span class="chat-participant-name">${username}</span>
+        <span class="chat-participant-new-message">New message</span>
       </div>
     `
     usersList.appendChild(userElement)
@@ -22,18 +22,18 @@ function createChatUser(user, username) {
 // create element with input and container where messages will appear
 function createChatSpace(username) {
     const chatSpace = document.createElement('div')
-    chatSpace.className = 'chat-space-wrapper'
+    chatSpace.className = 'chat-container'
     chatSpace.dataset.username = username.replace(' ', '')
     chatSpace.innerHTML = `
-      <div class="chat-space-header">
-        <span class="chat-space-arrow-back">➜</span>
-        <img class="chat-space-avatar" src="chat-space-img" />
-        <span class="chat-space-name"></span>
+      <div class="chat-header">
+        <span class="chat-back-button">➜</span>
+        <img class="chat-avatar" src="" />
+        <span class="chat-name"></span>
       </div>
-      <div class="chat-space"></div>
-      <div class="chat-space-form">
-        <input type="text" class="chat-space-input" placeholder="Your message here"/>
-        <button class="chat-space-button">Send</button>
+      <div class="chat"></div>
+      <div class="chat-form">
+        <input type="text" class="chat-input" placeholder="Your message here"/>
+        <button class="chat-send-button">Send</button>
       </div>
     `
     document.body.appendChild(chatSpace)
@@ -55,9 +55,9 @@ export function removeUserFromChat(mutation) {
     const removedUser = mutation.removedNodes[0]
     const username = removedUser.querySelector('.zWGUib').textContent.replaceAll(' ', '')
     if (username) {
-        const chatUser = document.querySelector(`.chat-user[data-chatname=${username}`)
-        const emptyMessagesList = document.querySelector('.empty-messages-list')
-        const messagesList = document.querySelector('.message-list')
+        const chatUser = document.querySelector(`.chat-participant[data-chatname=${username}`)
+        const emptyMessagesList = document.querySelector('.empty-chat')
+        const messagesList = document.querySelector('.chat-participants')
         messagesList.removeChild(chatUser)
         if (messagesList.children.length === 1) emptyMessagesList.style.display = 'flex'
     }
@@ -67,7 +67,7 @@ export function removeUserFromChat(mutation) {
 export function openChat(listOfMessageUsers, openChatButton) {
   listOfMessageUsers.style.display = 'flex'
   openChatButton.style.display = 'none'
-  const messageIndicator = document.querySelector('.message-indicator')
+  const messageIndicator = document.querySelector('.new-chat-message-indicator')
   messageIndicator.textContent = '0'
   messageIndicator.style.display = 'none'
 }
@@ -81,17 +81,17 @@ export function closeChat(listOfMessageUsers, openChatButton) {
 //function that opens chat with certain user
 export function openChatSpace(e) {
   const openChatSpaceElement = e.target;
-  const chatUser = openChatSpaceElement.closest('.chat-user')
-  let username = chatUser.querySelector('.chat-user-name').textContent;
-  let avatar = chatUser.querySelector('.chat-user-avatar').src;
+  const chatUser = openChatSpaceElement.closest('.chat-participant')
+  let username = chatUser.querySelector('.chat-participant-name').textContent;
+  let avatar = chatUser.querySelector('.chat-participant-avatar').src;
 
-  const newMessageText = chatUser.querySelector('.chat-user-new-message');
+  const newMessageText = chatUser.querySelector('.chat-participant-new-message');
   newMessageText.style.display = 'none';
 
-  const chatSpaceWrapper = document.querySelector(`.chat-space-wrapper[data-username="${username.replace(' ', '')}"]`);
-  const chatSpace = chatSpaceWrapper.querySelector('.chat-space');
-  const chatSpaceUsername = chatSpaceWrapper.querySelector('.chat-space-name');
-  const chatSpaceAvatar = chatSpaceWrapper.querySelector('.chat-space-avatar');
+  const chatSpaceWrapper = document.querySelector(`.chat-container[data-username="${username.replace(' ', '')}"]`);
+  const chatSpace = chatSpaceWrapper.querySelector('.chat');
+  const chatSpaceUsername = chatSpaceWrapper.querySelector('.chat-name');
+  const chatSpaceAvatar = chatSpaceWrapper.querySelector('.chat-avatar');
 
   chatSpaceAvatar.src = avatar;
   chatSpaceUsername.innerHTML = username;
@@ -103,11 +103,11 @@ export function openChatSpace(e) {
 //function when user want to return from chat with certain user to list of users in chat
 export function returnToMainChat(e, openChatButton) {
   const returnToMainChatButton = e.target;
-  const username = returnToMainChatButton.parentElement.querySelector('.chat-space-name').textContent.trim().replace(' ', '')
-  const chatSpace = document.querySelector(`.chat-space-wrapper[data-username="${username}"`)
+  const username = returnToMainChatButton.parentElement.querySelector('.chat-name').textContent.trim().replace(' ', '')
+  const chatSpace = document.querySelector(`.chat-container[data-username="${username}"`)
   chatSpace.style.visibility = 'hidden'
   chatSpace.style.opacity = '0'
-  document.querySelector('.message-list-wrapper').style.display = 'flex'
+  document.querySelector('.chat-wrapper').style.display = 'flex'
   openChatButton.style.display = 'flex'
 }
 
@@ -118,10 +118,10 @@ export async function sendChatMessage(e, MEET_CODE) {
   if (!message.value) return
   const chatSpace = sendChatMessageButton.parentElement.previousElementSibling;
   const messageElement = document.createElement('div')
-  messageElement.className = 'sended-message'
+  messageElement.className = 'chat-sended-message'
   messageElement.innerHTML = message.value
   chatSpace.appendChild(messageElement)
-  const to = message.parentElement.previousElementSibling.previousElementSibling.querySelector('.chat-space-name').textContent;
+  const to = message.parentElement.previousElementSibling.previousElementSibling.querySelector('.chat-name').textContent;
   const { host } = await new Promise(resolve => chrome.storage.local.get(["host"], resolve));
 
   fetch('https://adventurous-glorious-actor.glitch.me/send-messages', {

@@ -2,7 +2,6 @@
 const { REQUEST_TOKEN } = await import(chrome.runtime.getURL('../resources/env.js'));
 
 export function addUser(users, MEET_CODE, DATE, DASHBOARD_LINK) {
-    console.log(REQUEST_TOKEN)
     Array.from(users).forEach(user => {
         const userInfo = user.querySelector('.SKWIhd')
         const userAvatar = userInfo.querySelector('.BEaVse > img')

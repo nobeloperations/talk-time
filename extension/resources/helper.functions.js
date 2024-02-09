@@ -19,15 +19,18 @@ export function $el(tag, props) {
 }
 
 // function that works with countdown of window close on modals (when someone receive badge, when topic changed and modal when you reach limit of sent badges)
-export function startModalCountdown(modal, modalMessageElement, modalMessage, modalTimerSeconds) {
+export function startModalCountdown(modal, modalMessageElement, modalMessage, modalTimerSeconds, image) {
+    const imageElement = modal.querySelector('.alert-image')
+    imageElement.src = image
     modal.style.transform = 'translate(-50%, 0)'
+    modal.style.top = '20px'
     modalMessageElement.innerHTML = modalMessage
     let n = 4;
     const timerToClose = setInterval(() => {
       modalTimerSeconds.innerHTML = n--;
     }, 1000)
     setTimeout(() => {
-        modal.style.transform = 'translate(-50%, -300%)'
+        modal.style.transform = 'translate(-50%, -100vh)'
         clearInterval(timerToClose)
         modalTimerSeconds.innerHTML = "5";
     }, 5000)
@@ -59,57 +62,83 @@ export function closeBadgesModal(modalShadow, badgeModalWrapper, badgeSearchInpu
     })
 }
 
-// function that opens badges modal
-export function openBadgesModal(e, modalShadow, badgeModalWrapper) {
+// function that opens badges modal (and check what level of badges user has)
+export async function openBadgesModal(e, modalShadow, badgeModalWrapper, DASHBOARD_LINK) {
     const openBadgesModalButton = e.target;
     modalShadow.style.display = 'flex'
     badgeModalWrapper.style.display = 'flex'
-    let attr = openBadgesModalButton.parentElement.getAttribute('data-name')
-    chrome.storage.local.set({ "badge_name": attr })
+    let username = openBadgesModalButton.parentElement.getAttribute('data-name')
+    chrome.storage.local.set({ "badge_name": username })
+    
+    const response = await fetch(`${DASHBOARD_LINK}/badges/${username}`)
+    let { allowedBadges, allBadgesStats } = await response.json()
+
+    const badgesNamesElements = badgeModalWrapper.querySelectorAll('.badge .badge-name');
+    const badgesLevelsElements = badgeModalWrapper.querySelectorAll('.badge .badge-level');
+    let badgesLevels = [];
+
+    badgesLevelsElements.forEach(badgesLevelElement => {
+        badgesLevels.push(badgesLevelElement.textContent)
+    })
+
+    badgesNamesElements.forEach(badgeNameElement => {
+        const sendBadgeButton = badgeNameElement.parentElement.parentElement.nextElementSibling;
+        sendBadgeButton.disabled = !allowedBadges.includes(badgeNameElement.textContent)
+    })
+
+    badgesNamesElements.forEach(badgeNameElement => {
+        const badgeLevelElement = badgeNameElement.nextElementSibling.nextElementSibling;
+        const badgeName = badgeNameElement.textContent;
+        const level = allBadgesStats.find(badgeStat => badgeStat.name === badgeName).level;
+        const count = allBadgesStats.find(badgeStat => badgeStat.name === badgeName).count;
+        badgeLevelElement.innerHTML = `${count} badge(s) | ${level} level`;
+    })
 }
 
 // function that grab all needed data and make a request to create a new badge in db and sends a message about received badge
-export async function sendBadge(e, modalShadow, DASHBOARD_LINK, MEET_CODE, DATE, badgeModalWrapper, badgesLimitAlert) {
-    const sendBadgeButton = e.target;
-    modalShadow.style.display = 'none';
-    const { badge_name } = await new Promise(resolve => chrome.storage.local.get(["badge_name"], resolve));
-    const { current_name } = await new Promise(resolve => chrome.storage.local.get(["current_name"], resolve));
-    let badgeName = sendBadgeButton.previousElementSibling.querySelector('span').textContent;
-    const badgeLimit = localStorage.getItem("badge_limit");
-    if(+badgeLimit) {
-        localStorage.setItem("badge_limit", badgeLimit - 1)
-        fetch(`${DASHBOARD_LINK}/badges/givebadge/${MEET_CODE}/${badge_name}/${DATE}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                badge: badgeName,
+    export async function sendBadge(e, modalShadow, DASHBOARD_LINK, MEET_CODE, DATE, badgeModalWrapper, badgesLimitAlert) {
+        const sendBadgeButton = e.target;
+        modalShadow.style.display = 'none';
+        const { badge_name } = await new Promise(resolve => chrome.storage.local.get(["badge_name"], resolve));
+        const { current_name } = await new Promise(resolve => chrome.storage.local.get(["current_name"], resolve));
+        let badgeName = sendBadgeButton.previousElementSibling.querySelector('span').textContent;
+        let badgeImageName = badgeName.split(' ').map(badge => badge.toLowerCase()).join('_');
+        let badgeImageURL = `https://nobeltt.com/img/${badgeImageName}.png`
+        const badgeLimit = localStorage.getItem("badge_limit");
+        if(+badgeLimit) {
+            localStorage.setItem("badge_limit", badgeLimit - 1)
+            fetch(`${DASHBOARD_LINK}/badges/givebadge/${MEET_CODE}/${badge_name}/${DATE}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    badge: badgeName,
+                    from: current_name
+                })
             })
-        })
-            .then(() => {
-                fetch('https://adventurous-glorious-actor.glitch.me/send-messages', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({message: `${badge_name} received ${badgeName} badge from ${current_name}`, url: MEET_CODE, date: DATE, type: "BADGE" })
+                .then(() => {
+                    fetch('https://adventurous-glorious-actor.glitch.me/send-messages', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({message: `${badge_name} received an upvote on a ${badgeName} badge from ${current_name}`, url: MEET_CODE, date: DATE, type: "BADGE", image: badgeImageURL })
+                    });
                 });
-            });
-    }
+        }
 
-    badgeModalWrapper.style.display = 'none';
-    const badgesLimitTimerSeconds = document.querySelector('.badges-limit-timer-seconds')
-    const badgesLimitMessage = document.querySelector('.badges-limit-message')
-    
-    if(!+badgeLimit) startModalCountdown(badgesLimitAlert, badgesLimitMessage, "You`ve reach the limit of sent badges for this meeting!", badgesLimitTimerSeconds)
+        badgeModalWrapper.style.display = 'none';
+        const badgesLimitTimerSeconds = document.querySelector('.badges-limit-timer-seconds')
+        const badgesLimitMessage = document.querySelector('.exhausted-badges-limit-message')
+        
+        if(!+badgeLimit) startModalCountdown(badgesLimitAlert, badgesLimitMessage, "You`ve reach the limit of sent badges for this meeting!", badgesLimitTimerSeconds, "https://cdn-icons-png.flaticon.com/128/3563/3563395.png")
     }
 
 //function that creates new note
-export async function createNote(modalShadow, DASHBOARD_LINK, MEET_CODE, DATE, notesModal) {
+export async function addNote(modalShadow, DASHBOARD_LINK, MEET_CODE, DATE, notesModal) {
     const { current_name } = await new Promise(resolve => chrome.storage.local.get(['current_name'], resolve));
-    modalShadow.style.display = 'none'
-    let note = document.querySelector('.note')
+    let note = document.querySelector('.create-note-input')
     if (note.value) {
-        fetch(`${DASHBOARD_LINK}/newconclusion/${MEET_CODE}/${DATE}`, {
+        fetch(`${DASHBOARD_LINK}/newnote/${MEET_CODE}/${DATE}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -121,16 +150,17 @@ export async function createNote(modalShadow, DASHBOARD_LINK, MEET_CODE, DATE, n
                 sender: current_name
             })
         })
-            .then(() => {
-                notesModal.style.display = 'none'
-            })
+        .then(() => {
+            notesModal.style.display = 'none'
+            modalShadow.style.display = 'none'
+        })
     }
 }
 
 //function that closes notes modal
 export function closeNotesModal(modalShadow, notesModal) {
     modalShadow.style.display = 'none'
-    let noteInput = document.querySelector('.note')
+    let noteInput = document.querySelector('.create-note-input')
     notesModal.style.display = 'none'
     noteInput.value = ''
 }
@@ -148,7 +178,7 @@ export function setNewTopic(topicInput, MEET_CODE, DATE, modalShadow, topicModal
     fetch('https://adventurous-glorious-actor.glitch.me/send-messages', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: MEET_CODE, date: DATE, message: `New topic of the meeting: ${topicValue}`, type: "TOPIC" })
+        body: JSON.stringify({ url: MEET_CODE, date: DATE, message: `Current topic of the meeting: ${topicValue}`, type: "TOPIC", image: "https://cdn-icons-png.flaticon.com/128/8755/8755955.png" })
     })
 
     closeTopicModal(modalShadow, topicModal, topicInput)
@@ -158,7 +188,7 @@ export function setNewTopic(topicInput, MEET_CODE, DATE, modalShadow, topicModal
 export function searchBadges(searchBadgesInput, badges) {
     let value = searchBadgesInput.value.toLowerCase()
     badges.forEach(badge => {
-        let badgeName = badge.querySelector('.span-wrapper > span')
+        let badgeName = badge.querySelector('.badge-name')
         if (!badgeName.textContent.toLowerCase().includes(value) && value) badge.style.display = 'none'
         else badge.style.display = 'flex'
     })
