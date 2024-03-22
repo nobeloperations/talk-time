@@ -69,18 +69,6 @@ export function receiveBadgeMessage(message, date, MEET_CODE) {
     }
 }
 
-//function that invoke when someone has changed topic
-export function receiveTopicMessage(message, date, MEET_CODE) {
-    const topicMessage = document.querySelector('.new-topic-message')
-    const currTopic = document.querySelector('.current-topic')
-    const topicAlert = document.querySelector('.topic-alert')
-    const topicTimerSeconds = document.querySelector('.topic-timer-seconds')
-    if (message.url === MEET_CODE && message.date === date) {
-        currTopic.innerHTML = message.message;
-        startModalCountdown(topicAlert, topicMessage, message.message, topicTimerSeconds, message.image)
-    }
-}
-
 //function that can be used to close messages modal (don`t depend on a class of element)
 export function closeMessageModal(e) {
     const modal = e.target.parentElement;

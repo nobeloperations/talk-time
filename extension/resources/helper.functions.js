@@ -1,3 +1,5 @@
+const { generateChatBadgeMessage } = await import(chrome.runtime.getURL('../resources/html.functions.js'));
+
 // function that wait when element appears so app can work with it
 export async function waitForElement(selector) {
     while (true) {
@@ -36,15 +38,6 @@ export function startModalCountdown(modal, modalMessageElement, modalMessage, mo
     }, 5000)
 }
 
-//function that do a small visual effects when you want to go to dashboard or see current topic of the meet
-export function dashboardAndTopicVisual(el, selector, topValue) {
-    const wrapper = document.querySelector(selector);
-    const attr = el.dataset.active;
-    el.dataset.active = attr ? '' : 'true';
-    el.style.transform = attr ? `rotate(360deg)` : `rotate(-360deg)`;
-    wrapper.style.top = attr ? `-${topValue}px` : '0';
-}
-
 //just styles for topic and notes modal
 export function openTopicAndNotesModal(modalShadow, modal, optionsWrapper) {
     modalShadow.style.display = 'flex'
@@ -71,7 +64,7 @@ export async function openBadgesModal(e, modalShadow, badgeModalWrapper, DASHBOA
     chrome.storage.local.set({ "badge_name": username })
     
     const response = await fetch(`${DASHBOARD_LINK}/badges/${username}`)
-    let { allowedBadges, allBadgesStats } = await response.json()
+    let { allowedBadges } = await response.json()
 
     const badgesNamesElements = badgeModalWrapper.querySelectorAll('.badge .badge-name');
     const badgesLevelsElements = badgeModalWrapper.querySelectorAll('.badge .badge-level');
@@ -84,14 +77,6 @@ export async function openBadgesModal(e, modalShadow, badgeModalWrapper, DASHBOA
     badgesNamesElements.forEach(badgeNameElement => {
         const sendBadgeButton = badgeNameElement.parentElement.parentElement.nextElementSibling;
         sendBadgeButton.disabled = !allowedBadges.includes(badgeNameElement.textContent)
-    })
-
-    badgesNamesElements.forEach(badgeNameElement => {
-        const badgeLevelElement = badgeNameElement.nextElementSibling.nextElementSibling;
-        const badgeName = badgeNameElement.textContent;
-        const level = allBadgesStats.find(badgeStat => badgeStat.name === badgeName).level;
-        const count = allBadgesStats.find(badgeStat => badgeStat.name === badgeName).count;
-        badgeLevelElement.innerHTML = `${count} badge(s) | ${level} level`;
     })
 }
 
@@ -118,19 +103,23 @@ export async function openBadgesModal(e, modalShadow, badgeModalWrapper, DASHBOA
                 })
             })
                 .then(() => {
+                    let message = `${badge_name} received an upvote on a ${badgeName} badge from ${current_name}`;
                     fetch('https://adventurous-glorious-actor.glitch.me/send-messages', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({message: `${badge_name} received an upvote on a ${badgeName} badge from ${current_name}`, url: MEET_CODE, date: DATE, type: "BADGE", image: badgeImageURL })
+                        body: JSON.stringify({message, url: MEET_CODE, date: DATE, type: "BADGE", image: badgeImageURL })
+                    })
+                    .then(() => {
+                        badgeModalWrapper.style.display = 'none';
+                        const badgesLimitTimerSeconds = document.querySelector('.badges-limit-timer-seconds')
+                        const badgesLimitMessage = document.querySelector('.exhausted-badges-limit-message')
+                        
+                        if(!+badgeLimit) startModalCountdown(badgesLimitAlert, badgesLimitMessage, "You`ve reach the limit of sent badges for this meeting!", badgesLimitTimerSeconds, "https://cdn-icons-png.flaticon.com/128/3563/3563395.png")
                     });
-                });
+                })
         }
 
-        badgeModalWrapper.style.display = 'none';
-        const badgesLimitTimerSeconds = document.querySelector('.badges-limit-timer-seconds')
-        const badgesLimitMessage = document.querySelector('.exhausted-badges-limit-message')
         
-        if(!+badgeLimit) startModalCountdown(badgesLimitAlert, badgesLimitMessage, "You`ve reach the limit of sent badges for this meeting!", badgesLimitTimerSeconds, "https://cdn-icons-png.flaticon.com/128/3563/3563395.png")
     }
 
 //function that creates new note
@@ -163,25 +152,6 @@ export function closeNotesModal(modalShadow, notesModal) {
     let noteInput = document.querySelector('.create-note-input')
     notesModal.style.display = 'none'
     noteInput.value = ''
-}
-
-//function that closes set new topic modal
-export function closeTopicModal(modalShadow, topicModal, topicInput) {
-    modalShadow.style.display = 'none'
-    topicModal.style.display = 'none'
-    topicInput.value = ''
-}
-
-//function that sends message to all of participants that now we have a new topic of the meet
-export function setNewTopic(topicInput, MEET_CODE, DATE, modalShadow, topicModal) {
-    const topicValue = topicInput.value;
-    fetch('https://adventurous-glorious-actor.glitch.me/send-messages', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: MEET_CODE, date: DATE, message: `Current topic of the meeting: ${topicValue}`, type: "TOPIC", image: "https://cdn-icons-png.flaticon.com/128/8755/8755955.png" })
-    })
-
-    closeTopicModal(modalShadow, topicModal, topicInput)
 }
 
 //search badges function

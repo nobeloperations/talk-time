@@ -1,16 +1,16 @@
 window.onload = async function () {
   //import all functions
-  const { generateHTML, addTopicAndNotesItems, addTopicAndDashboardFlags, createOpenChatButton, createWelcomeModal } = await import(chrome.runtime.getURL('./resources/html.functions.js'))
-  const { waitForElement, $el, dashboardAndTopicVisual, openTopicAndNotesModal, closeBadgesModal, openBadgesModal, sendBadge, addNote, closeNotesModal, closeTopicModal, setNewTopic, searchBadges, openWelcomeModal, closeWelcomeModal, startModalCountdown } = await import(chrome.runtime.getURL('./resources/helper.functions.js'));
+  const { generateHTML, addTopicAndNotesItems, addDashboardLink, createOpenChatButton, createWelcomeModal } = await import(chrome.runtime.getURL('./resources/html.functions.js'))
+  const { waitForElement, $el, openTopicAndNotesModal, closeBadgesModal, openBadgesModal, sendBadge, addNote, closeNotesModal, searchBadges, closeWelcomeModal, startModalCountdown } = await import(chrome.runtime.getURL('./resources/helper.functions.js'));
   const { setHost, setCurrentName } = await import(chrome.runtime.getURL('./resources/storage.functions.js'));
-  const { replyToHost, receiveMessageFromParticipant, receiveMessageFromHost, receiveBadgeMessage, receiveTopicMessage, closeMessageModal } = await import(chrome.runtime.getURL('./resources/message.functions.js'));
+  const { replyToHost, receiveMessageFromParticipant, receiveMessageFromHost, receiveBadgeMessage, closeMessageModal } = await import(chrome.runtime.getURL('./resources/message.functions.js'));
   const { addUserToChat, removeUserFromChat, openChat, closeChat, returnToMainChat, sendChatMessage, openChatSpace } = await import(chrome.runtime.getURL('./resources/chat.functions.js'));
   const { addUser } = await import(chrome.runtime.getURL('./resources/user.functions.js'));
   const { addMeeting } = await import(chrome.runtime.getURL('./resources/meeting.functions.js'));
   const { DASHBOARD_LINK, DATE, CHAT_LINK, CURRENT_VERSION, MEET_CODE } = await import(chrome.runtime.getURL("./resources/env.js"))
   const welcomeBackground = chrome.runtime.getURL('./resources/welcome.png')
   //declaring variables here to use that in all scope but assign values later
-  let badgeModalWrapper, badges, badgeSearchInput, newVersionModal, notesModal, topicModal, topicInput, modalShadow, listOfMessageUsers, openChatButton, optionsWrapper, welcomeModal, badgesLimitAlert, disabledBadgesAlert;
+  let badgeModalWrapper, badges, badgeSearchInput, newVersionModal, notesModal, modalShadow, listOfMessageUsers, openChatButton, optionsWrapper, welcomeModal, badgesLimitAlert, disabledBadgesAlert;
 
   //set limit for badges per meeting
   localStorage.setItem("badge_limit", 5);
@@ -54,7 +54,6 @@ window.onload = async function () {
 
     const messageFunctions = {
       'BADGE': () => { receiveBadgeMessage(message, DATE, MEET_CODE) },
-      'TOPIC': () => { receiveTopicMessage(message, DATE, MEET_CODE) },
       'MESSAGE_FROM_HOST': () => { receiveMessageFromHost(message) },
       'MESSAGE_TO_HOST': () => { receiveMessageFromParticipant(message) }
     }
@@ -72,8 +71,6 @@ window.onload = async function () {
       badges = document.querySelectorAll('.badge')
       badgeSearchInput = document.querySelector('.badges-search')
       notesModal = document.querySelector('.create-note-modal')
-      topicModal = document.querySelector('.new-topic-modal')
-      topicInput = document.querySelector('.new-topic-input')
       modalShadow = document.querySelector('.modal-shadow')
       listOfMessageUsers = document.querySelector('.chat-wrapper')
       newVersionModal = document.querySelector('.new-version-modal')
@@ -94,7 +91,25 @@ window.onload = async function () {
         .then(response => {
           const latestVersion = response.version;
           if (CURRENT_VERSION !== latestVersion) newVersionModal.style.display = 'flex'
-        })
+        });
+
+        // (async function () {
+        //   const talkTimeBody = await waitForElement('.talk-time-body')
+          
+        //   const badgesObserver = new MutationObserver((mutationsList, _) => {
+        //     const badgesPopups = document.querySelectorAll('.badges-popup');
+
+        //     badgesPopups.forEach(badgesPopup => {
+        //       const parent = badgesPopup.parentElement;
+
+        //       const { right, left, top, bottom } = parent.getBoundingClientRect();
+              
+        //       badgesPopup.style.left = `${left - 10}px`
+        //     })
+        // });
+        
+        // badgesObserver.observe(talkTimeBody, { childList: true, subtree: true });
+        // })();
 
       //every time user opens three dots menu, this function invokes (mutation observer is observe is element presented in html or not)
       let optionsObserver = new MutationObserver(async function (mutations) {
@@ -109,8 +124,6 @@ window.onload = async function () {
               addTopicAndNotesItems(optionsWrapper)
               const openNotes = await waitForElement('.options-note')
               openNotes.onclick = () => { openTopicAndNotesModal(modalShadow, notesModal, optionsWrapper) }
-              const openTopic = await waitForElement('.options-topic')
-              openTopic.onclick = () => { openTopicAndNotesModal(modalShadow, topicModal, optionsWrapper) }
             }
           }
         }
@@ -156,12 +169,6 @@ window.onload = async function () {
         usersListObserver.observe(listOfUsers, config);
       })();
 
-      //function that add small icons (left top corner) to html
-      (async function () {
-        const meetingName = (await waitForElement('.ouH3xe')).textContent;
-        addTopicAndDashboardFlags(MEET_CODE, DATE, meetingName)
-      })();
-
       //set up onlick for add note button
       (async function () {
         const addNoteButton = await waitForElement('.create-note')
@@ -172,33 +179,6 @@ window.onload = async function () {
       (async function () {
         const closeNoteModalButton = await waitForElement('.close-create-note-modal')
         closeNoteModalButton.onclick = () => { closeNotesModal(modalShadow, notesModal) }
-      })();
-
-      //set up onclick for close topic modal
-      (async function () {
-        const closeTopicModalButton = await waitForElement('.close-new-topic-modal')
-        closeTopicModalButton.onclick = () => { closeTopicModal(modalShadow, topicModal, topicInput) }
-      })();
-
-      //set up onclick for set new topic button
-      (async function () {
-        const setNewTopicButton = await waitForElement('.set-topic')
-        setNewTopicButton.onclick = () => { setNewTopic(topicInput, MEET_CODE, DATE, modalShadow, topicModal) }
-      })();
-
-      //set up onclick for dashboard link and current topic icons (left top corner)
-      (async function () {
-        const dashboardLink = await waitForElement('.dashboard-link-image')
-        dashboardLink.onclick = () => {
-          dashboardAndTopicVisual(dashboardLink, '.dashboard-link', 90)
-        }
-      })();
-
-      (async function () {
-        const dashboardLink = await waitForElement('.current-topic-image')
-        dashboardLink.onclick = () => {
-          dashboardAndTopicVisual(dashboardLink, '.current-topic', 100)
-        }
       })();
 
       //set up onclick for button that opens chat
@@ -240,6 +220,11 @@ window.onload = async function () {
         closeWelcomeElement.onclick = () => { closeWelcomeModal(welcomeModal, modalShadow) }
       })();
 
+      function badgesModalOnHover(e) {
+        const popup = e.target.nextElementSibling;
+        popup.style.display = 'flex'
+      };
+
       (async function () {
         const leaveMeetingButton = await waitForElement('.jh0Tpd');
         leaveMeetingButton.onclick = () => {
@@ -270,7 +255,6 @@ window.onload = async function () {
         const options = {
           'close-received-message-alert': () => { closeMessageModal(e) },
           'close-badges-alert': () => { closeMessageModal(e) },
-          'close-topic-alert': () => { closeMessageModal(e) },
           'open-badges-modal': () => { openBadgesModal(e, modalShadow, badgeModalWrapper, DASHBOARD_LINK) },
           'give-upvote': () => { sendBadge(e, modalShadow, DASHBOARD_LINK, MEET_CODE, DATE, badgeModalWrapper, badgesLimitAlert) },
           'chat-participant-avatar': () => { openChatSpace(e) },
@@ -358,7 +342,8 @@ window.onload = async function () {
         dom_container = $el('div', { id: "talk-time-container" });
         dom_container.innerHTML = `
         <div class="talk-time-top" title="Click to collapse/expand">
-          <img class="talk-time-logo" style=" filter: grayscale(1) invert(1);" src="https://cdn-icons-png.flaticon.com/24/1827/1827379.png" />
+          <img class="talk-time-logo" style=" filter: grayscale(1) invert(1);" src="https://cdn-icons-png.flaticon.com/128/2767/2767146.png" />
+          <a class="dashboard-link" href=""><div class="dashboard-link-button">Dashboard</div></a>
         </div>
         <div class="talk-time-header">
           <div class="talk-time-summary">Total Talk Time: <span id="talk-time-summary-total"></span></div>
@@ -374,8 +359,10 @@ window.onload = async function () {
         let onclick = function (selector, f) {
           dom_container.querySelector(selector).addEventListener('click', f);
         };
-        onclick('.talk-time-top', (e) => {
-          if (e.target.className !== 'open-welcome-modal') dom_container.classList.toggle('collapsed')
+        onclick('.talk-time-logo', () => {
+          dom_container.classList.toggle('collapsed')
+          if (Array.from(dom_container.classList).length) document.querySelector('.dashboard-link-button').style.display = 'none'
+          else document.querySelector('.dashboard-link-button').style.display = 'flex'
         });
       }
 
@@ -406,10 +393,9 @@ window.onload = async function () {
             <td class="talk-time-name">${record.name}</td>
             <td class="talk-time-time">0:00</td>
             <td class="talk-time-pct unique_pct_selector">0%</td>
-            <button class="open-badges-modal">Give upvote on a badge</button>
-            <td class="talk-time-groups">${createParticipantRowGroups(record)}</td>
-            
+            <button class="open-badges-modal">Upvote</button>
           `;
+          
         record.row = row;
         record.time_display = row.querySelector('.talk-time-time');
         record.pct_display = row.querySelector('.talk-time-pct');
@@ -425,18 +411,6 @@ window.onload = async function () {
           })
         });
         return row;
-      }
-
-      // Create the group selectors that go into each participant's row
-      function createParticipantRowGroups() {
-        return `
-        <div class="talk-time-group-selector-container" title="Click groups to add this participant's time to a group bucket">
-          <div class="talk-time-group-selector talk-time-group-selector-a" data-group="a">A</div>
-          <div class="talk-time-group-selector talk-time-group-selector-b" data-group="b">B</div>
-          <div class="talk-time-group-selector talk-time-group-selector-c" data-group="c">C</div>
-          <div class="talk-time-group-selector talk-time-group-selector-d" data-group="d">D</div>
-        </div>
-        `;
       }
 
       // ==================================================================
@@ -631,6 +605,12 @@ window.onload = async function () {
       // ==================================================================
       // Watch for the talk icon to animate
       let observer = new MutationObserver(function (mutations) {
+
+        (async function () {
+          const meetingName = (await waitForElement('.ouH3xe')).textContent;
+          const dashboardLinkButton = await waitForElement('.dashboard-link-button')
+          if (dashboardLinkButton) addDashboardLink(MEET_CODE, DATE, meetingName)
+        })();
 
         try {
           const allTr = document.querySelectorAll('.talk-time-table > tr')

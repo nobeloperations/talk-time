@@ -119,7 +119,6 @@ function createAlert(body, className, messageClass, timerClass) {
 }
 
 function createAlerts(body) {
-  createAlert(body, 'topic-alert', 'new-topic-message', 'topic-timer-seconds');
   createAlert(body, 'badges-alert', 'received-badge-message', 'badges-timer-seconds');
   createAlert(body, 'badges-limit-alert', 'exhausted-badges-limit-message', 'badges-limit-timer-seconds');
   createAlert(body, 'disabled-badges-alert', 'disabled-badges-message', 'disabled-badges-timer-seconds');
@@ -150,25 +149,7 @@ function createShadowModal(body) {
     body.appendChild(modalShadow)
 }
 
-//function that creates modal, it appears when you want to set a new topic
-function createTopicModal(body) {
-    let topicModal = document.createElement('div')
-    topicModal.className = 'new-topic-modal'
-    topicModal.innerHTML = `
-      <h2 class="new-topic-modal-title">Change topic</h2>
-      <input type="text" class="new-topic-input" placeholder="Enter your topic">
-      <hr />
-      <div class="new-topic-buttons">
-       <button class="close-new-topic-modal">Cancel</button>
-       <button class="set-topic">Change topic</button>
-      </div>
-      <span class="new-topic-instructions">* Current topic will be displayed when click on "flag" icon in top-left corner</span>
-    `
-
-    body.appendChild(topicModal)
-}
-
-//template for new topic and add note items in three dots menu
+//template for add note items in three dots menu
 export const optionButtons = `
 
 <div class="options-note">
@@ -186,20 +167,6 @@ export const optionButtons = `
     </svg>
     <span class="options-span">Add note</span>
     </div>
-    </div>
-
-<div class="options-topic">
-    <div class="options-topic-wrapper">
-    <svg class="options-img options-topic-image" viewBox="0 0 48 48" enable-background="new 0 0 48 48" id="Layer_1" version="1.1"
-        xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-          <g id="Layer_3">
-          <polygon fill="#241F20"
-                  points="42.25,4 36.523,4 36.25,4 34.781,4 32.312,4 31.312,4 28.781,4 27.166,4 25.25,4 25.062,4    25.062,1.625 25.062,0.375 25.062,0 11.875,0 5.75,0 5.75,22 5.75,48 11.875,48 11.875,22 19,22 22.75,22 25.062,22 25.25,22    25.25,23 25.25,25.625 25.25,26 31.312,26 32.312,26 34.25,26 36.25,26 36.523,26 42.25,26 37.25,15  " />
-
-          </g>
-          </svg>
-        <span class="options-span">Topic of the meet</span>
-      </div>
     </div>
 `
 //function that creates a template for chat (list of users)
@@ -237,7 +204,6 @@ function createNewVersionModal(body) {
 //function that added all elements, which should be added at time when user just enter google meet
 export function generateHTML(body) {
     createListOfMessageUsers(body)
-    createTopicModal(body)
     createShadowModal(body)
     createNotesModal(body)
     createReplyToMessageModal(body)
@@ -256,23 +222,9 @@ export function addTopicAndNotesItems(optionsWrapper) {
 }
 
 //function that creates current topic and dashboard link items (in top left corner)
-export function addTopicAndDashboardFlags(MEET_CODE, DATE, meetingName) {
-
-    let dashboardLink = document.createElement('div');
-    dashboardLink.className = 'dashboard-link-wrapper';
-    dashboardLink.innerHTML = `
-      <img class="dashboard-link-image" data-linkactive="" src="https://cdn-icons-png.flaticon.com/128/4050/4050374.png"/>
-      <a class="dashboard-link" href="https://nobeltt.com/dashboard/${MEET_CODE}/${DATE}?q=${meetingName}">Visit dashboard</a>
-    `;
-    document.body.appendChild(dashboardLink);
-
-    let topicWrapper = document.createElement('div');
-    topicWrapper.className = 'current-topic-wrapper';
-    topicWrapper.innerHTML = `
-      <img class="current-topic-image" data-topicactive="" src="https://cdn-icons-png.flaticon.com/128/4886/4886806.png"/>
-      <span class="current-topic">No topic yet</span>
-    `;
-    document.body.appendChild(topicWrapper);
+export function addDashboardLink(MEET_CODE, DATE, meetingName) {
+    const dashboardLink = document.querySelector('.dashboard-link');
+    dashboardLink.href = `https://nobeltt.com/dashboard/${MEET_CODE}/${DATE}?q=${meetingName}`
 }
 
 //function that creates open chat button (in bottom left corner)
@@ -304,3 +256,35 @@ export async function createOpenChatButton() {
     `
     document.body.appendChild(welcomeWindow)
   }
+
+export function generateChatBadgeMessage(message) {
+
+  const currentDate = new Date();
+
+  let hours = currentDate.getHours();
+  const minutes = currentDate.getMinutes();
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+
+  hours = hours % 12;
+  hours = hours ? hours : 12;
+
+  const currentTime = hours + ':' + (minutes < 10 ? '0' : '') + minutes + ' ' + ampm;
+
+  return `
+    <div jsaction="JIbuQc:sCzVOd(aUCive),T4Iwcd(g21v4c),yyLnsd(iJEnyb),yFT8A(RNMM1e),Cg1Rgf(EZbOH)" class="Ss4fHf" jsname="Ypafjf" tabindex="-1" jscontroller="LQRnv" style="order: 0;">
+    <div class="QTyiie">
+      <div class="poVWob">Talk Time</div>
+      <div jsname="biJjHb" class="MuzmKe">${currentTime}</div>
+    </div>
+    <div class="beTDc">
+      <div class="er6Kjc chmVPb">
+        <div class="ptNLrf">
+          <div jsname="dTKtvb">
+            <div jsaction="rcuQ6b:XZyPzc" jscontroller="RrV5Ic" data-is-tv="false">${message}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  `
+}
